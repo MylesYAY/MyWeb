@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #e0f7ff; /* Baby blue background */
+      background-color: #e0f7ff;
       color: #333;
       margin: 0;
       padding: 0;
@@ -81,8 +81,30 @@
       color: #444;
     }
 
-    #results div:last-child {
-      border-bottom: none;
+    #pagination {
+      margin-top: 20px;
+    }
+
+    .page-button {
+      display: inline-block;
+      margin: 0 5px;
+      padding: 8px 12px;
+      border: 1px solid #0288d1;
+      border-radius: 6px;
+      color: #0288d1;
+      cursor: pointer;
+      font-weight: bold;
+      background-color: #fff;
+    }
+
+    .page-button.active {
+      background-color: #0288d1;
+      color: white;
+    }
+
+    .page-button:hover {
+      background-color: #0277bd;
+      color: white;
     }
   </style>
 </head>
@@ -94,39 +116,51 @@
 
   <div class="search-section">
     <input type="text" id="searchQuery" placeholder="Search something cool..." />
-    <button class="search-button" onclick="search()">Search</button>
+    <button class="search-button" onclick="search(1)">Search</button>
   </div>
 
   <div id="results"></div>
+  <div id="pagination"></div>
 
   <script>
     const PROXY_URL = 'https://bob.mylesjohn2012.workers.dev';
+    let currentQuery = '';
 
-    async function search() {
-      const query = document.getElementById('searchQuery').value;
+    async function search(page = 1) {
+      const query = document.getElementById('searchQuery').value.trim();
+      if (!query && !currentQuery) return;
+      currentQuery = query || currentQuery;
+
       const resultsDiv = document.getElementById('results');
+      const paginationDiv = document.getElementById('pagination');
+      resultsDiv.innerHTML = '';
+      paginationDiv.innerHTML = '';
       resultsDiv.style.display = 'none';
 
-      if (!query) {
-        resultsDiv.innerHTML = '';
-        return;
-      }
-
-      const url = `${PROXY_URL}/?q=${encodeURIComponent(query)}`;
+      const start = (page - 1) * 10 + 1;
+      const url = `${PROXY_URL}/?q=${encodeURIComponent(currentQuery)}&start=${start}`;
 
       try {
         const response = await fetch(url);
         const data = await response.json();
-        resultsDiv.innerHTML = '';
 
         if (data.items) {
           resultsDiv.style.display = 'block';
           data.items.forEach(item => {
             const result = document.createElement('div');
-            result.innerHTML = `<h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
-                                <p>${item.snippet}</p>`;
+            result.innerHTML = `<h3><a href="${item.link}" target="_blank">${item.title}</a></h3><p>${item.snippet}</p>`;
             resultsDiv.appendChild(result);
           });
+
+          // Build pagination
+          const totalPages = Math.min(Math.ceil((data.searchInformation.totalResults || 30) / 10), 5); // Limit to 5 pages max
+          for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement('span');
+            btn.className = 'page-button' + (i === page ? ' active' : '');
+            btn.textContent = i;
+            btn.onclick = () => search(i);
+            paginationDiv.appendChild(btn);
+          }
         } else {
           resultsDiv.innerHTML = '<p>No results found.</p>';
           resultsDiv.style.display = 'block';
