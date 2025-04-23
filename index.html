@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home - My Website</title>
+  <style>
+    /* Basic styles for layout and appearance */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    /* Style the search bar container */
+    #search-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    /* Style the search input */
+    #searchQuery {
+      padding: 10px;
+      font-size: 16px;
+      width: 250px;
+      border: 2px solid #0073aa;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+
+    /* Style the search button */
+    .search-button {
+      padding: 10px 20px;
+      background-color: #0073aa;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .search-button:hover {
+      background-color: #005c8c;
+    }
+
+    /* Style the results section */
+    #results {
+      padding: 20px;
+      border: 2px solid #0073aa;
+      border-radius: 8px;
+      background-color: #fff;
+      width: 80%;
+      max-width: 600px;
+      display: none; /* Hide until search results are available */
+      margin-top: 20px;
+    }
+
+    /* Style for individual search result items */
+    #results div {
+      margin-bottom: 15px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+
+    /* Style for result links */
+    #results h3 a {
+      text-decoration: none;
+      color: #0073aa;
+      font-size: 18px;
+    }
+
+    #results p {
+      color: #333;
+      font-size: 14px;
+    }
+
+    #results div:hover {
+      background-color: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Homepage Header -->
+  <h1>Welcome to My Website</h1>
+
+  <!-- Search Bar Section -->
+  <div id="search-container">
+    <input type="text" id="searchQuery" placeholder="Enter your search..." />
+    <button class="search-button" onclick="search()">Search</button>
+  </div>
+
+  <!-- Results Section -->
+  <div id="results"></div>
+
+  <script>
+    // Cloudflare Worker URL (proxy for Google Custom Search API)
+    const PROXY_URL = 'https://bob.mylesjohn2012.workers.dev';
+
+    async function search() {
+      const query = document.getElementById('searchQuery').value;
+      const resultsDiv = document.getElementById('results');
+      
+      // Hide results section if there's no query
+      resultsDiv.style.display = 'none';
+      
+      if (!query) {
+        resultsDiv.innerHTML = ''; // Clear previous results if query is empty
+        return; // Stop execution if no query
+      }
+
+      // Build the URL for search query
+      const url = `${PROXY_URL}/?q=${encodeURIComponent(query)}`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        resultsDiv.innerHTML = ''; // Clear any previous results
+
+        if (data.items) {
+          resultsDiv.style.display = 'block'; // Show results container
+          data.items.forEach(item => {
+            const result = document.createElement('div');
+            result.innerHTML = `<h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+                                <p>${item.snippet}</p>`;
+            resultsDiv.appendChild(result);
+          });
+        } else {
+          resultsDiv.innerHTML = '<p>No results found.</p>';
+          resultsDiv.style.display = 'block'; // Show the message even if no results
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+        resultsDiv.innerHTML = '<p>Something went wrong. Please try again.</p>';
+        resultsDiv.style.display = 'block'; // Show error message
+      }
+    }
+  </script>
+
+</body>
+</html>
