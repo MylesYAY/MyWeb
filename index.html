@@ -19,7 +19,7 @@
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      overflow-x: hidden;  /* Prevent horizontal scrolling */
+      overflow-x: hidden;
     }
 
     .content {
@@ -28,8 +28,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      max-height: 100vh;  /* Ensures content doesn't exceed the viewport */
-      overflow-y: auto;  /* Allow vertical scrolling */
+      max-height: 100vh;
+      overflow-y: auto;
     }
 
     h1 {
@@ -79,7 +79,7 @@
       background-size: cover;
       background-position: center;
       border-radius: 50%;
-      animation: wildJump 5s ease-in-out forwards; /* Stop after 5 seconds */
+      animation: wildJump 5s ease-in-out forwards;
       display: none;
     }
 
@@ -101,7 +101,7 @@
       }
       100% {
         transform: translateX(-150%) translateY(-300px) rotate(360deg);
-        opacity: 0; /* Fade out at the end */
+        opacity: 0;
       }
     }
 
@@ -152,47 +152,6 @@
     #dictionaryResults div:hover {
       background-color: #f1f1f1;
     }
-
-    /* Mobile-specific styles */
-    @media (max-width: 768px) {
-      .search-container {
-        flex-direction: column;
-        width: 80%;
-      }
-
-      input[type="text"] {
-        width: 100%;
-        margin-bottom: 10px;
-      }
-
-      .search-button,
-      .dictionary-button {
-        width: 100%;
-        margin-top: 10px;
-      }
-
-      .results-container {
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-      }
-
-      .results-column {
-        width: 100%;
-        margin-bottom: 20px;
-      }
-
-      #frog {
-        display: block;
-        width: 50px;
-        height: auto;
-        position: absolute;
-        top: 20%;
-        left: 50%;
-        transform: translateX(-50%);
-        animation: wildJump 5s ease-in-out forwards;
-      }
-    }
   </style>
 </head>
 <body>
@@ -217,14 +176,12 @@
     const frog = document.getElementById('frog');
     
     async function search() {
-      const query = document.getElementById('searchQuery').value.toLowerCase();  // Convert to lowercase for case-insensitive check
+      const query = document.getElementById('searchQuery').value.toLowerCase();
       const resultsDiv = document.getElementById('results');
       
       if (query === 'ralph' || query === 'ralphie') {
-        // Show frog and start the jump animation
         frog.style.display = 'block';
         
-        // Wait for frog to finish jumping out before showing frog-related results
         setTimeout(async () => {
           try {
             const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/Frog`;
@@ -241,9 +198,8 @@
             console.error('Error fetching frog data:', error);
             resultsDiv.innerHTML = '<p>Failed to fetch frog information.</p>';
           }
-        }, 5000); // Adjust time to match frog animation duration
+        }, 5000);
       } else {
-        // Handle regular search
         const url = `https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`;
         try {
           const response = await fetch(url);
@@ -266,6 +222,39 @@
           resultsDiv.innerHTML = '<p>Something went wrong.</p>';
           resultsDiv.style.display = 'block';
         }
+      }
+    }
+
+    async function lookupDictionary() {
+      const query = document.getElementById('dictionaryQuery').value.trim();
+      const dictionaryResultsDiv = document.getElementById('dictionaryResults');
+      if (!query) return;
+
+      dictionaryResultsDiv.innerHTML = `<p>Loading...</p>`;
+      dictionaryResultsDiv.style.display = 'block';
+
+      try {
+        const apiUrl = `https://wordsapiv1.p.rapidapi.com/words/${encodeURIComponent(query)}/definitions`;
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'X-RapidAPI-Host': 'wordsapiv1.p.rapidapi.com',
+            'X-RapidAPI-Key': 'YOUR_RAPIDAPI_KEY' // Replace with your API key
+          }
+        });
+
+        const data = await response.json();
+        if (data.definitions && data.definitions.length > 0) {
+          dictionaryResultsDiv.innerHTML = `<h3>Definitions:</h3>`;
+          data.definitions.forEach(def => {
+            dictionaryResultsDiv.innerHTML += `<div><strong>${def.partOfSpeech}</strong>: ${def.definition}</div>`;
+          });
+        } else {
+          dictionaryResultsDiv.innerHTML = '<p>No definitions found.</p>';
+        }
+      } catch (error) {
+        console.error('Dictionary lookup error:', error);
+        dictionaryResultsDiv.innerHTML = '<p>Failed to fetch dictionary data.</p>';
       }
     }
 </script>
