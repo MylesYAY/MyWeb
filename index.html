@@ -21,13 +21,27 @@
       flex-direction: column;
     }
 
+    .content {
+      flex: 1;
+      padding: 40px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      color: #0073aa;
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+
     .search-container {
       display: flex;
       gap: 10px;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
       flex-wrap: wrap;
       justify-content: center;
-      width: 100%;
     }
 
     input[type="text"] {
@@ -37,7 +51,8 @@
       width: 300px;
     }
 
-    .search-button {
+    .search-button,
+    .dictionary-button {
       padding: 12px 20px;
       background-color: #0073aa;
       color: white;
@@ -47,39 +62,69 @@
       font-size: 16px;
     }
 
-    .search-button:hover {
+    .search-button:hover,
+    .dictionary-button:hover {
       background-color: #005c8c;
     }
 
     #frog {
       position: absolute;
-      top: 50%;
+      bottom: 0;
       left: 50%;
-      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      background-image: url('frog.png');
+      background-size: cover;
+      background-position: center;
+      border-radius: 50%;
+      animation: wildJump 5s ease-in-out forwards; /* Stop after 5 seconds */
       display: none;
-      animation: jump 5s infinite;
     }
 
-    @keyframes jump {
-      0% { transform: translate(-50%, -50%) scale(1); }
-      25% { transform: translate(-50%, -150%) scale(1.2); }
-      50% { transform: translate(-50%, -50%) scale(1); }
-      75% { transform: translate(-50%, -150%) scale(1.2); }
-      100% { transform: translate(-50%, -50%) scale(1); }
+    @keyframes wildJump {
+      0% {
+        transform: translateX(-50%) translateY(0) rotate(0deg);
+      }
+      20% {
+        transform: translateX(-50%) translateY(-100px) rotate(45deg);
+      }
+      40% {
+        transform: translateX(150%) translateY(-150px) rotate(-45deg);
+      }
+      60% {
+        transform: translateX(-100%) translateY(-200px) rotate(90deg);
+      }
+      80% {
+        transform: translateX(80%) translateY(-100px) rotate(-90deg);
+      }
+      100% {
+        transform: translateX(-150%) translateY(-300px) rotate(360deg);
+        opacity: 0; /* Fade out at the end */
+      }
     }
 
-    #results {
+    .results-container {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .results-column {
+      width: 48%;
+    }
+
+    #results,
+    #dictionaryResults {
       background-color: #ffffff;
       border-radius: 12px;
       padding: 20px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
       display: none;
-      margin-top: 20px;
-      width: 100%;
-      max-width: 800px;
     }
 
-    #results div {
+    #results div,
+    #dictionaryResults div {
       margin-bottom: 15px;
       padding: 15px;
       border: 1px solid #ddd;
@@ -88,65 +133,44 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
-    #results h3 a {
+    #results h3 a,
+    #dictionaryResults h3 a {
       text-decoration: none;
       color: #0073aa;
       font-size: 18px;
     }
 
-    #results p {
+    #results p,
+    #dictionaryResults p {
       color: #333;
       font-size: 14px;
     }
 
-    #results div:hover {
+    #results div:hover,
+    #dictionaryResults div:hover {
       background-color: #f1f1f1;
-    }
-
-    /* Mobile-specific styles */
-    @media (max-width: 768px) {
-      .search-container {
-        flex-direction: column;
-        width: 80%;
-      }
-
-      input[type="text"] {
-        width: 100%;
-        margin-bottom: 10px;
-      }
-
-      .search-button {
-        width: 100%;
-        margin-top: 10px;
-      }
-
-      #frog {
-        display: block;
-        width: 50px;
-        height: auto;
-        position: absolute;
-        top: 20%;
-        left: 50%;
-        transform: translateX(-50%);
-        animation: jump 5s infinite;
-      }
     }
   </style>
 </head>
 <body>
+  <div id="frog"></div>
+  
+  <div class="content" id="mainContent">
+    <h1>MylesWeb</h1>
+    <div class="search-container">
+      <input type="text" id="searchQuery" placeholder="Search...">
+      <button class="search-button" onclick="search()">Search</button>
+      <input type="text" id="dictionaryQuery" placeholder="Dictionary...">
+      <button class="dictionary-button" onclick="lookupDictionary()">Define</button>
+    </div>
 
-  <div id="frog">
-    <img src="frog.png" alt="Frog" width="100" />
+    <div class="results-container">
+      <div class="results-column" id="results"></div>
+      <div class="results-column" id="dictionaryResults"></div>
+    </div>
   </div>
 
-  <div class="search-container">
-    <input type="text" id="searchQuery" placeholder="Search...">
-    <button class="search-button" onclick="search()">Search</button>
-  </div>
-
-  <div id="results"></div>
-
-  <script>
+<script>
     const frog = document.getElementById('frog');
     
     async function search() {
@@ -154,7 +178,7 @@
       const resultsDiv = document.getElementById('results');
       
       if (query === 'ralph' || query === 'ralphie') {
-        // Show frog animation and search results for frog
+        // Show frog and start the jump animation
         frog.style.display = 'block';
         
         // Wait for frog to finish jumping out before showing frog-related results
@@ -201,6 +225,6 @@
         }
       }
     }
-  </script>
+</script>
 </body>
 </html>
