@@ -319,11 +319,11 @@
             });
           });
         } else {
-          dictDiv.innerHTML = '<p>No definitions found.</p>';
+          dictDiv.innerHTML = '<p>No definition found.</p>';
         }
       } catch (error) {
         console.error('Dictionary error:', error);
-        dictDiv.innerHTML = '<p>Error fetching definition.</p>';
+        dictDiv.innerHTML = '<p>Could not fetch dictionary data.</p>';
         dictDiv.style.display = 'block';
       }
     }
