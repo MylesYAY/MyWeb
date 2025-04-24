@@ -3,28 +3,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MylesWeb Search</title>
+  <title>MylesWeb</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #e6f0fa;
+      background-color: #fdfdfd;
       margin: 0;
       padding: 0;
       display: flex;
-      flex-direction: column;
-      align-items: center;
     }
 
-    h1 {
-      color: #0073aa;
-      margin-top: 30px;
+    .sidebar {
+      width: 250px;
+      background-color: #0073aa;
+      color: white;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+
+    .sidebar h2 {
+      margin: 0 0 20px;
+      font-size: 24px;
+    }
+
+    .sidebar button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 18px;
+      text-align: left;
+      padding: 10px 0;
+      cursor: pointer;
+    }
+
+    .sidebar button:hover {
+      text-decoration: underline;
+    }
+
+    .main-content {
+      margin-left: 250px;
+      padding: 40px;
+      width: 100%;
     }
 
     .search-container {
       display: flex;
       gap: 10px;
-      margin-top: 20px;
+      margin-bottom: 20px;
     }
 
     input[type="text"] {
@@ -48,26 +80,12 @@
       background-color: #005c8c;
     }
 
-    .main-container {
-      display: flex;
-      gap: 20px;
-      margin-top: 30px;
-      width: 90%;
-      max-width: 1200px;
-    }
-
-    .column {
-      flex: 1;
-    }
-
     #results, #dictionaryResults {
       background-color: #f9f9f9;
       border-radius: 12px;
       padding: 20px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       display: none;
-      height: 100%;
-      overflow-y: auto;
     }
 
     #results div {
@@ -97,41 +115,42 @@
     #dictionaryResults {
       font-size: 14px;
     }
-
-    .divider {
-      width: 1px;
-      background-color: #ccc;
-      height: auto;
-    }
   </style>
 </head>
 <body>
-  <h1>MylesWeb</h1>
-<a href="https://github.com/MylesEvans/MylesWeb/releases/tag/Local" target="_blank" style="text-decoration: none;">
-  <button style="margin-top: 10px; padding: 10px 20px; background-color: #0073aa; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
-    Download Local Version
-  </button>
-</a>
-
-  <div class="search-container">
-    <input type="text" id="searchQuery" placeholder="Search...">
-    <button class="search-button" onclick="search()">Search</button>
-    <input type="text" id="dictionaryQuery" placeholder="Dictionary...">
-    <button class="dictionary-button" onclick="lookupDictionary()">Define</button>
+  <div class="sidebar">
+    <h2>MylesWeb</h2>
+    <button onclick="switchToSearch()">Search</button>
+    <button onclick="switchToDictionary()">Dictionary</button>
   </div>
+  <div class="main-content">
+    <div class="search-container">
+      <input type="text" id="searchQuery" placeholder="Search...">
+      <button class="search-button" onclick="search()">Search</button>
+    </div>
+    <div class="search-container" style="display:none;" id="dictBox">
+      <input type="text" id="dictionaryQuery" placeholder="Dictionary...">
+      <button class="dictionary-button" onclick="lookupDictionary()">Define</button>
+    </div>
 
-  <div class="main-container">
-    <div class="column">
-      <div id="results"></div>
-    </div>
-    <div class="divider"></div>
-    <div class="column">
-      <div id="dictionaryResults"></div>
-    </div>
+    <div id="results"></div>
+    <div id="dictionaryResults"></div>
   </div>
 
   <script>
     const PROXY_URL = 'https://bob.mylesjohn2012.workers.dev';
+
+    function switchToSearch() {
+      document.getElementById('results').style.display = 'block';
+      document.getElementById('dictionaryResults').style.display = 'none';
+      document.getElementById('dictBox').style.display = 'none';
+    }
+
+    function switchToDictionary() {
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('dictionaryResults').style.display = 'block';
+      document.getElementById('dictBox').style.display = 'flex';
+    }
 
     async function search() {
       const query = document.getElementById('searchQuery').value;
@@ -155,8 +174,7 @@
           resultsDiv.style.display = 'block';
           data.items.forEach(item => {
             const result = document.createElement('div');
-            result.innerHTML = `<h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
-                                <p>${item.snippet}</p>`;
+            result.innerHTML = `<h3><a href="${item.link}" target="_blank">${item.title}</a></h3><p>${item.snippet}</p>`;
             resultsDiv.appendChild(result);
           });
         } else {
@@ -191,7 +209,7 @@
           const wordInfo = data[0];
           dictDiv.innerHTML += `<h2>${wordInfo.word}</h2>`;
           wordInfo.meanings.forEach(meaning => {
-            dictDiv.innerHTML += `<h4>${meaning.partOfSpeech}</h4>`;
+            dictDiv.innerHTML += `<h4>${meaning.partOfSpeech}</h4><hr style="border: 0; border-top: 1px dashed #ccc;" />`;
             meaning.definitions.forEach(def => {
               dictDiv.innerHTML += `<p>- ${def.definition}</p>`;
               if (def.synonyms && def.synonyms.length > 0) {
