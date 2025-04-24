@@ -1,4 +1,121 @@
-<script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MylesWeb</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .search-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    input[type="text"] {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      width: 300px;
+    }
+
+    .search-button {
+      padding: 12px 20px;
+      background-color: #0073aa;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .search-button:hover {
+      background-color: #005c8c;
+    }
+
+    #frog {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+      animation: jump 5s infinite;
+    }
+
+    @keyframes jump {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      25% { transform: translate(-50%, -150%) scale(1.2); }
+      50% { transform: translate(-50%, -50%) scale(1); }
+      75% { transform: translate(-50%, -150%) scale(1.2); }
+      100% { transform: translate(-50%, -50%) scale(1); }
+    }
+
+    #results {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      display: none;
+      margin-top: 20px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    #results div {
+      margin-bottom: 15px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    #results h3 a {
+      text-decoration: none;
+      color: #0073aa;
+      font-size: 18px;
+    }
+
+    #results p {
+      color: #333;
+      font-size: 14px;
+    }
+
+    #results div:hover {
+      background-color: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="frog">
+    <img src="frog.png" alt="Frog" width="100" />
+  </div>
+
+  <div class="search-container">
+    <input type="text" id="searchQuery" placeholder="Search...">
+    <button class="search-button" onclick="search()">Search</button>
+  </div>
+
+  <div id="results"></div>
+
+  <script>
     const frog = document.getElementById('frog');
     
     async function search() {
@@ -53,4 +170,6 @@
         }
       }
     }
-</script>
+  </script>
+</body>
+</html>
