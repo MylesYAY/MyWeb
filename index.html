@@ -6,80 +6,28 @@
   <title>MylesWeb</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg-color: #fdfdfd;
-      --text-color: #222;
-      --accent-color: #a3d5ff;
-    }
-
-    body.dark-mode {
-      --bg-color: #1e1e1e;
-      --text-color: #f0f0f0;
-      --accent-color: #4aa4ff;
-    }
-
     body {
       font-family: 'Inter', sans-serif;
+      background-color: #f9f9f9;
       margin: 0;
       padding: 0;
-      background-color: var(--bg-color);
-      color: var(--text-color);
       display: flex;
-      min-height: 100vh;
-    }
-
-    .sidebar {
-      width: 250px;
-      background-color: var(--accent-color);
-      padding: 20px;
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar.collapsed {
-      transform: translateX(-100%);
-    }
-
-    .sidebar button {
-      display: block;
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 16px;
-      margin: 10px 0;
-      cursor: pointer;
-    }
-
-    .content {
-      flex: 1;
-      padding: 40px;
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
+      flex-direction: column;
       align-items: center;
-      margin-bottom: 20px;
     }
 
-    .toggle-sidebar {
-      font-size: 24px;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-
-    .center-title {
-      text-align: center;
-      font-size: 40px;
-      margin: 30px 0 20px 0;
-      color: var(--accent-color);
+    h1 {
+      color: #0073aa;
+      margin-top: 30px;
+      font-size: 48px;
     }
 
     .search-container {
       display: flex;
-      justify-content: center;
       gap: 10px;
-      margin-bottom: 40px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     input[type="text"] {
@@ -87,100 +35,109 @@
       border-radius: 8px;
       border: 1px solid #ccc;
       width: 300px;
+      font-size: 16px;
     }
 
     .search-button, .dictionary-button {
       padding: 12px 20px;
-      background-color: var(--accent-color);
+      background-color: #0073aa;
+      color: white;
       border: none;
       border-radius: 8px;
-      color: white;
       cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
     }
 
-    .results-container {
+    .search-button:hover, .dictionary-button:hover {
+      background-color: #005c8c;
+    }
+
+    .main-container {
       display: flex;
-      flex-direction: column;
-      gap: 20px;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .result-item {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 15px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .result-item h3 {
-      margin: 0 0 8px 0;
-    }
-
-    .result-item h3 a {
-      color: #1a0dab;
-      text-decoration: none;
-    }
-
-    .result-item p {
-      font-size: 14px;
-      color: #4d5156;
-    }
-
-    .settings {
+      gap: 30px;
       margin-top: 40px;
-      text-align: center;
+      width: 90%;
+      max-width: 1200px;
+    }
+
+    .column {
+      flex: 1;
+    }
+
+    #results, #dictionaryResults {
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      display: none;
+    }
+
+    #results div {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      background-color: #ffffff;
+      transition: background-color 0.2s;
+    }
+
+    #results h3 a {
+      text-decoration: none;
+      color: #0073aa;
+      font-size: 20px;
+    }
+
+    #results p {
+      color: #444;
+      font-size: 15px;
+    }
+
+    #results div:hover {
+      background-color: #f5f5f5;
+    }
+
+    #dictionaryResults {
+      font-size: 15px;
+    }
+
+    .divider {
+      width: 1px;
+      background-color: #ccc;
     }
   </style>
 </head>
 <body>
-  <div class="sidebar" id="sidebar">
-    <button onclick="toggleSection('search')">Search</button>
-    <button onclick="toggleSection('dictionary')">Dictionary</button>
-    <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+  <h1>MylesWeb</h1>
+  <div class="search-container">
+    <input type="text" id="searchQuery" placeholder="Search...">
+    <button class="search-button" onclick="search()">Search</button>
+    <input type="text" id="dictionaryQuery" placeholder="Dictionary...">
+    <button class="dictionary-button" onclick="lookupDictionary()">Define</button>
   </div>
 
-  <div class="content">
-    <div class="topbar">
-      <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+  <div class="main-container">
+    <div class="column">
+      <div id="results"></div>
     </div>
-
-    <div class="center-title">MylesWeb</div>
-
-    <div class="search-container">
-      <input type="text" id="searchQuery" placeholder="Search...">
-      <button class="search-button" onclick="search()">Search</button>
-    </div>
-
-    <div class="results-container" id="results"></div>
-
-    <div class="settings">
-      <p>Use the sidebar to toggle dictionary and settings.</p>
+    <div class="divider"></div>
+    <div class="column">
+      <div id="dictionaryResults"></div>
     </div>
   </div>
 
   <script>
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('collapsed');
-    }
-
-    function toggleDarkMode() {
-      document.body.classList.toggle('dark-mode');
-    }
-
-    function toggleSection(section) {
-      alert(`Switching to ${section}`); // placeholder logic
-    }
-
     const PROXY_URL = 'https://bob.mylesjohn2012.workers.dev';
 
     async function search() {
       const query = document.getElementById('searchQuery').value;
       const resultsDiv = document.getElementById('results');
-      resultsDiv.innerHTML = '';
 
-      if (!query) return;
+      if (!query) {
+        resultsDiv.style.display = 'none';
+        resultsDiv.innerHTML = '';
+        return;
+      }
 
       const url = `${PROXY_URL}/?q=${encodeURIComponent(query)}`;
 
@@ -188,22 +145,63 @@
         const response = await fetch(url);
         const data = await response.json();
 
+        resultsDiv.innerHTML = '';
+
         if (data.items) {
+          resultsDiv.style.display = 'block';
           data.items.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'result-item';
-            div.innerHTML = `
-              <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
-              <p>${item.snippet}</p>
-            `;
-            resultsDiv.appendChild(div);
+            const result = document.createElement('div');
+            result.innerHTML = `<h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+                                <p>${item.snippet}</p>`;
+            resultsDiv.appendChild(result);
           });
         } else {
           resultsDiv.innerHTML = '<p>No results found.</p>';
+          resultsDiv.style.display = 'block';
         }
       } catch (error) {
         console.error('Search error:', error);
-        resultsDiv.innerHTML = '<p>Error performing search.</p>';
+        resultsDiv.innerHTML = '<p>Something went wrong.</p>';
+        resultsDiv.style.display = 'block';
+      }
+    }
+
+    async function lookupDictionary() {
+      const query = document.getElementById('dictionaryQuery').value;
+      const dictDiv = document.getElementById('dictionaryResults');
+
+      if (!query) {
+        dictDiv.style.display = 'none';
+        dictDiv.innerHTML = '';
+        return;
+      }
+
+      try {
+        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        dictDiv.innerHTML = '';
+        dictDiv.style.display = 'block';
+
+        if (Array.isArray(data)) {
+          const wordInfo = data[0];
+          dictDiv.innerHTML += `<h2>${wordInfo.word}</h2>`;
+          wordInfo.meanings.forEach(meaning => {
+            dictDiv.innerHTML += `<h4>${meaning.partOfSpeech}</h4><hr style="border-top: 1px dashed #ccc;">`;
+            meaning.definitions.forEach(def => {
+              dictDiv.innerHTML += `<p>- ${def.definition}</p>`;
+              if (def.synonyms && def.synonyms.length > 0) {
+                dictDiv.innerHTML += `<p><strong>Synonyms:</strong> ${def.synonyms.join(', ')}</p>`;
+              }
+            });
+          });
+        } else {
+          dictDiv.innerHTML = '<p>No definitions found.</p>';
+        }
+      } catch (error) {
+        console.error('Dictionary error:', error);
+        dictDiv.innerHTML = '<p>Error fetching definition.</p>';
+        dictDiv.style.display = 'block';
       }
     }
   </script>
