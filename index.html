@@ -100,6 +100,13 @@
     #results div:hover {
       background-color: #f1f1f1;
     }
+
+    /* Mobile-specific styles */
+    @media (max-width: 768px) {
+      #frog {
+        display: block;
+      }
+    }
   </style>
 </head>
 <body>
@@ -123,11 +130,30 @@
       const resultsDiv = document.getElementById('results');
       
       if (query === 'ralph' || query === 'ralphie') {
-        // Show frog and start the jump animation
-        frog.style.display = 'block';
-        
-        // Wait for frog to finish jumping out before showing frog-related results
-        setTimeout(async () => {
+        // If on mobile, show frog and start the jump animation
+        if (window.innerWidth <= 768) {
+          frog.style.display = 'block';
+          
+          // Wait for frog to finish jumping out before showing frog-related results
+          setTimeout(async () => {
+            try {
+              const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/Frog`;
+              const response = await fetch(wikiApiUrl);
+              const data = await response.json();
+              
+              if (data && data.extract) {
+                resultsDiv.style.display = 'block';
+                resultsDiv.innerHTML = `<h3>Frog Facts:</h3><p>${data.extract}</p><a href="${data.content_urls.desktop.page}" target="_blank">Read more on Wikipedia</a>`;
+              } else {
+                resultsDiv.innerHTML = '<p>No frog-related information found.</p>';
+              }
+            } catch (error) {
+              console.error('Error fetching frog data:', error);
+              resultsDiv.innerHTML = '<p>Failed to fetch frog information.</p>';
+            }
+          }, 5000); // Adjust time to match frog animation duration
+        } else {
+          // For desktop, just show frog results without animation
           try {
             const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/Frog`;
             const response = await fetch(wikiApiUrl);
@@ -143,7 +169,7 @@
             console.error('Error fetching frog data:', error);
             resultsDiv.innerHTML = '<p>Failed to fetch frog information.</p>';
           }
-        }, 5000); // Adjust time to match frog animation duration
+        }
       } else {
         // Handle regular search
         const url = `https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`;
