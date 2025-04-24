@@ -51,10 +51,10 @@
       border-radius: 10px;
       border: 1px solid #ccc;
       width: 300px;
+      font-size: 16px;
     }
 
-    .search-button,
-    .dictionary-button {
+    .search-button {
       padding: 12px 20px;
       background-color: #0073aa;
       color: white;
@@ -64,8 +64,7 @@
       font-size: 16px;
     }
 
-    .search-button:hover,
-    .dictionary-button:hover {
+    .search-button:hover {
       background-color: #005c8c;
     }
 
@@ -107,50 +106,88 @@
 
     .results-container {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       width: 100%;
       max-width: 1200px;
+      margin-top: 20px;
     }
 
     .results-column {
-      width: 48%;
+      width: 100%;
+      max-width: 800px;
     }
 
-    #results,
-    #dictionaryResults {
+    #results {
       background-color: #ffffff;
       border-radius: 12px;
-      padding: 20px;
+      padding: 30px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
       display: none;
     }
 
-    #results div,
-    #dictionaryResults div {
-      margin-bottom: 15px;
-      padding: 15px;
+    #results div {
+      margin-bottom: 25px;
+      padding: 20px;
       border: 1px solid #ddd;
       border-radius: 8px;
       background-color: #fff;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      font-size: 18px;
+      display: flex;
+      align-items: center;
     }
 
-    #results h3 a,
-    #dictionaryResults h3 a {
+    #results h3 a {
       text-decoration: none;
       color: #0073aa;
-      font-size: 18px;
+      font-size: 22px;
+      margin-left: 20px;
     }
 
-    #results p,
-    #dictionaryResults p {
+    #results p {
       color: #333;
-      font-size: 14px;
+      font-size: 16px;
     }
 
-    #results div:hover,
-    #dictionaryResults div:hover {
+    #results div:hover {
       background-color: #f1f1f1;
+    }
+
+    #results img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    /* Mobile Styles */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      .content {
+        padding: 20px;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        font-size: 14px;
+      }
+
+      .search-button {
+        width: 100%;
+        font-size: 14px;
+        padding: 14px;
+      }
+
+      #results div {
+        font-size: 16px;
+      }
+
+      #results h3 a {
+        font-size: 18px;
+      }
     }
   </style>
 </head>
@@ -162,13 +199,10 @@
     <div class="search-container">
       <input type="text" id="searchQuery" placeholder="Search...">
       <button class="search-button" onclick="search()">Search</button>
-      <input type="text" id="dictionaryQuery" placeholder="Dictionary...">
-      <button class="dictionary-button" onclick="lookupDictionary()">Define</button>
     </div>
 
     <div class="results-container">
       <div class="results-column" id="results"></div>
-      <div class="results-column" id="dictionaryResults"></div>
     </div>
   </div>
 
@@ -210,7 +244,12 @@
             resultsDiv.style.display = 'block';
             data.items.forEach(item => {
               const result = document.createElement('div');
-              result.innerHTML = `<h3><a href="${item.link}" target="_blank">${item.title}</a></h3><p>${item.snippet}</p>`;
+              const imgSrc = item.pagemap?.cse_image?.[0]?.src || ''; // Thumbnail image source
+              result.innerHTML = `
+                <img src="${imgSrc}" alt="${item.title}" />
+                <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+                <p>${item.snippet}</p>
+              `;
               resultsDiv.appendChild(result);
             });
           } else {
@@ -222,39 +261,6 @@
           resultsDiv.innerHTML = '<p>Something went wrong.</p>';
           resultsDiv.style.display = 'block';
         }
-      }
-    }
-
-    async function lookupDictionary() {
-      const query = document.getElementById('dictionaryQuery').value.trim();
-      const dictionaryResultsDiv = document.getElementById('dictionaryResults');
-      if (!query) return;
-
-      dictionaryResultsDiv.innerHTML = `<p>Loading...</p>`;
-      dictionaryResultsDiv.style.display = 'block';
-
-      try {
-        const apiUrl = `https://wordsapiv1.p.rapidapi.com/words/${encodeURIComponent(query)}/definitions`;
-        const response = await fetch(apiUrl, {
-          method: 'GET',
-          headers: {
-            'X-RapidAPI-Host': 'wordsapiv1.p.rapidapi.com',
-            'X-RapidAPI-Key': 'YOUR_RAPIDAPI_KEY' // Replace with your API key
-          }
-        });
-
-        const data = await response.json();
-        if (data.definitions && data.definitions.length > 0) {
-          dictionaryResultsDiv.innerHTML = `<h3>Definitions:</h3>`;
-          data.definitions.forEach(def => {
-            dictionaryResultsDiv.innerHTML += `<div><strong>${def.partOfSpeech}</strong>: ${def.definition}</div>`;
-          });
-        } else {
-          dictionaryResultsDiv.innerHTML = '<p>No definitions found.</p>';
-        }
-      } catch (error) {
-        console.error('Dictionary lookup error:', error);
-        dictionaryResultsDiv.innerHTML = '<p>Failed to fetch dictionary data.</p>';
       }
     }
 </script>
