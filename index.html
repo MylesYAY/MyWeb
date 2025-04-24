@@ -101,15 +101,18 @@
 
     .search-container {
       display: flex;
+      flex-wrap: wrap;
       gap: 10px;
       margin-bottom: 30px;
+      justify-content: center;
     }
 
     input[type="text"] {
       padding: 12px;
       border-radius: 10px;
       border: 1px solid #ccc;
-      width: 300px;
+      width: 100%;
+      max-width: 300px;
     }
 
     .search-button, .dictionary-button {
@@ -128,13 +131,15 @@
 
     .main-container {
       display: flex;
+      flex-wrap: wrap;
       gap: 20px;
       width: 100%;
       max-width: 1000px;
     }
 
     .column {
-      flex: 1;
+      flex: 1 1 100%;
+      min-width: 300px;
     }
 
     #results, #dictionaryResults {
@@ -168,6 +173,23 @@
     #results div:hover {
       background-color: #f1f1f1;
     }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 80%;
+        max-width: 300px;
+      }
+
+      .content {
+        margin-left: 0 !important;
+        padding: 20px;
+      }
+
+      .main-container {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
   </style>
 </head>
 <body>
@@ -176,6 +198,9 @@
   <div class="sidebar collapsed" id="sidebar">
     <button class="close-btn" onclick="toggleSidebar()">×</button>
     <h2>Menu</h2>
+    <a href="#" onclick="menuOptionSelected()">Option 1</a>
+    <a href="#" onclick="menuOptionSelected()">Option 2</a>
+    <a href="#" onclick="menuOptionSelected()">Option 3</a>
   </div>
 
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
@@ -208,6 +233,13 @@
       const isCollapsed = sidebar.classList.toggle('collapsed');
       overlay.classList.toggle('active', !isCollapsed);
       menuBtn.classList.toggle('visible', isCollapsed);
+    }
+
+    function menuOptionSelected() {
+      if (!sidebar.classList.contains('collapsed')) {
+        toggleSidebar();
+      }
+      // You could navigate or load content here as needed.
     }
 
     const PROXY_URL = 'https://bob.mylesjohn2012.workers.dev';
