@@ -18,6 +18,7 @@
       height: 100vh;
       justify-content: center;
       align-items: center;
+      flex-direction: column;
     }
 
     .search-container {
@@ -26,6 +27,7 @@
       margin-bottom: 30px;
       flex-wrap: wrap;
       justify-content: center;
+      width: 100%;
     }
 
     input[type="text"] {
@@ -103,8 +105,30 @@
 
     /* Mobile-specific styles */
     @media (max-width: 768px) {
+      .search-container {
+        flex-direction: column;
+        width: 80%;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+
+      .search-button {
+        width: 100%;
+        margin-top: 10px;
+      }
+
       #frog {
         display: block;
+        width: 50px;
+        height: auto;
+        position: absolute;
+        top: 20%;
+        left: 50%;
+        transform: translateX(-50%);
+        animation: jump 5s infinite;
       }
     }
   </style>
@@ -130,30 +154,11 @@
       const resultsDiv = document.getElementById('results');
       
       if (query === 'ralph' || query === 'ralphie') {
-        // If on mobile, show frog and start the jump animation
-        if (window.innerWidth <= 768) {
-          frog.style.display = 'block';
-          
-          // Wait for frog to finish jumping out before showing frog-related results
-          setTimeout(async () => {
-            try {
-              const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/Frog`;
-              const response = await fetch(wikiApiUrl);
-              const data = await response.json();
-              
-              if (data && data.extract) {
-                resultsDiv.style.display = 'block';
-                resultsDiv.innerHTML = `<h3>Frog Facts:</h3><p>${data.extract}</p><a href="${data.content_urls.desktop.page}" target="_blank">Read more on Wikipedia</a>`;
-              } else {
-                resultsDiv.innerHTML = '<p>No frog-related information found.</p>';
-              }
-            } catch (error) {
-              console.error('Error fetching frog data:', error);
-              resultsDiv.innerHTML = '<p>Failed to fetch frog information.</p>';
-            }
-          }, 5000); // Adjust time to match frog animation duration
-        } else {
-          // For desktop, just show frog results without animation
+        // Show frog animation and search results for frog
+        frog.style.display = 'block';
+        
+        // Wait for frog to finish jumping out before showing frog-related results
+        setTimeout(async () => {
           try {
             const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/Frog`;
             const response = await fetch(wikiApiUrl);
@@ -169,7 +174,7 @@
             console.error('Error fetching frog data:', error);
             resultsDiv.innerHTML = '<p>Failed to fetch frog information.</p>';
           }
-        }
+        }, 5000); // Adjust time to match frog animation duration
       } else {
         // Handle regular search
         const url = `https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`;
