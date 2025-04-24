@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MylesWeb</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
     body {
       font-family: 'Inter', sans-serif;
       background-color: #f9f9f9;
       margin: 0;
-      display: flex;
       height: 100vh;
+      overflow-x: hidden;
     }
 
     .sidebar {
@@ -19,26 +19,52 @@
       background-color: #0073aa;
       color: white;
       padding: 20px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: -260px;
+      transition: left 0.3s ease;
+      z-index: 1000;
       display: flex;
       flex-direction: column;
       box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
     }
 
-    .sidebar h2 {
-      margin-top: 0;
-      margin-bottom: 20px;
-      font-size: 20px;
+    .sidebar.open {
+      left: 0;
     }
 
-    .sidebar a {
-      color: white;
-      text-decoration: none;
-      margin-bottom: 10px;
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 900;
+      display: none;
+    }
+
+    .overlay.show {
       display: block;
     }
 
+    .menu-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: #0073aa;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+      z-index: 1100;
+    }
+
     .content {
-      flex: 1;
+      margin-left: 0;
       padding: 40px;
       display: flex;
       flex-direction: column;
@@ -55,6 +81,8 @@
       display: flex;
       gap: 10px;
       margin-bottom: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     input[type="text"] {
@@ -123,12 +151,13 @@
   </style>
 </head>
 <body>
-  <div class="sidebar">
+  <div class="sidebar" id="sidebar">
     <h2>Menu</h2>
-    <a href="#">Search</a>
-    <a href="#">Dictionary</a>
-    <!-- More options will be added here -->
+    <!-- Menu options will go here later -->
   </div>
+
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+  <button class="menu-button" onclick="toggleSidebar()">☰</button>
 
   <div class="content">
     <h1>MylesWeb</h1>
@@ -150,6 +179,13 @@
   </div>
 
   <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('show');
+    }
+
     const PROXY_URL = 'https://bob.mylesjohn2012.workers.dev';
 
     async function search() {
@@ -229,4 +265,4 @@
     }
   </script>
 </body>
-</html>
+</
