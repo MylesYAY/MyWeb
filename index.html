@@ -45,6 +45,25 @@
       margin-bottom: 20px;
     }
 
+    .menu-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      font-size: 24px;
+      background-color: #0073aa;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 12px;
+      cursor: pointer;
+      z-index: 3;
+      display: none;
+    }
+
+    .menu-btn.visible {
+      display: block;
+    }
+
     .overlay {
       position: fixed;
       top: 0;
@@ -152,10 +171,11 @@
   </style>
 </head>
 <body>
-  <div class="sidebar" id="sidebar">
+  <button class="menu-btn visible" id="menuBtn" onclick="toggleSidebar()">☰</button>
+
+  <div class="sidebar collapsed" id="sidebar">
     <button class="close-btn" onclick="toggleSidebar()">×</button>
     <h2>Menu</h2>
-    <!-- New links will be added later -->
   </div>
 
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
@@ -182,10 +202,12 @@
   <script>
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
+    const menuBtn = document.getElementById('menuBtn');
 
     function toggleSidebar() {
-      sidebar.classList.toggle('collapsed');
-      overlay.classList.toggle('active');
+      const isCollapsed = sidebar.classList.toggle('collapsed');
+      overlay.classList.toggle('active', !isCollapsed);
+      menuBtn.classList.toggle('visible', isCollapsed);
     }
 
     const PROXY_URL = 'https://bob.mylesjohn2012.workers.dev';
