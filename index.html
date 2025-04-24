@@ -15,100 +15,17 @@
       background-color: #f9f9f9;
       margin: 0;
       display: flex;
-      flex-direction: column;
-    }
-
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 98;
-      display: none;
-    }
-
-    .sidebar {
-      width: 240px;
-      background-color: #0073aa;
-      color: white;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
-      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-      z-index: 99;
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar.open {
-      transform: translateX(0);
-    }
-
-    .sidebar h2 {
-      margin-top: 0;
-      margin-bottom: 20px;
-      font-size: 20px;
-    }
-
-    .close-btn {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 24px;
-      align-self: flex-end;
-      margin-bottom: 20px;
-      cursor: pointer;
-    }
-
-    .menu-btn {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      background-color: #0073aa;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      font-size: 18px;
-      border-radius: 5px;
-      cursor: pointer;
-      z-index: 100;
+      height: 100vh;
     }
 
     .content {
-      padding: 40px 20px;
+      flex: 1;
+      padding: 40px;
       margin-left: 0;
-      transition: margin-left 0.3s ease;
+      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      z-index: 1;
-    }
-
-    @media (min-width: 768px) {
-      body {
-        flex-direction: row;
-        display: flex;
-      }
-
-      .sidebar {
-        transform: translateX(0);
-        position: relative;
-      }
-
-      .menu-btn {
-        display: none;
-      }
-
-      .overlay {
-        display: none !important;
-      }
-
-      .content {
-        margin-left: 240px;
-      }
     }
 
     h1 {
@@ -123,25 +40,6 @@
       margin-bottom: 30px;
       flex-wrap: wrap;
       justify-content: center;
-    }
-
-    @media (max-width: 600px) {
-      .search-container {
-        flex-direction: column;
-        align-items: center;
-        gap: 15px;
-      }
-
-      input[type="text"] {
-        width: 100%;
-        max-width: 300px;
-      }
-
-      .search-button,
-      .dictionary-button {
-        width: 100%;
-        max-width: 300px;
-      }
     }
 
     input[type="text"] {
@@ -173,7 +71,6 @@
       width: 100%;
       max-width: 1000px;
       flex-wrap: wrap;
-      justify-content: center;
     }
 
     .column {
@@ -216,16 +113,7 @@
   </style>
 </head>
 <body>
-  <div class="menu-btn" onclick="toggleSidebar()">☰</div>
-  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-  <div class="sidebar" id="sidebar">
-    <button class="close-btn" onclick="toggleSidebar()">×</button>
-    <h2>Menu</h2>
-    <!-- Future links go here -->
-  </div>
-
-  <div class="content">
+  <div class="content" id="mainContent">
     <h1>MylesWeb</h1>
     <div class="search-container">
       <input type="text" id="searchQuery" placeholder="Search...">
@@ -245,39 +133,27 @@
   </div>
 
   <script>
-    const PROXY_URL = 'https://bob.mylesjohn2012.workers.dev';
-
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('overlay');
-      sidebar.classList.toggle('open');
-      overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
-    }
-
     async function search() {
       const query = document.getElementById('searchQuery').value;
       const resultsDiv = document.getElementById('results');
-
       if (!query) {
         resultsDiv.style.display = 'none';
         resultsDiv.innerHTML = '';
         return;
       }
 
-      const url = `${PROXY_URL}/?q=${encodeURIComponent(query)}`;
+      const url = `https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`;
 
       try {
         const response = await fetch(url);
         const data = await response.json();
-
         resultsDiv.innerHTML = '';
 
         if (data.items) {
           resultsDiv.style.display = 'block';
           data.items.forEach(item => {
             const result = document.createElement('div');
-            result.innerHTML = `<h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
-                                <p>${item.snippet}</p>`;
+            result.innerHTML = `<h3><a href="${item.link}" target="_blank">${item.title}</a></h3><p>${item.snippet}</p>`;
             resultsDiv.appendChild(result);
           });
         } else {
@@ -304,7 +180,6 @@
       try {
         const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(query)}`);
         const data = await response.json();
-
         dictDiv.innerHTML = '';
         dictDiv.style.display = 'block';
 
@@ -321,11 +196,11 @@
             });
           });
         } else {
-          dictDiv.innerHTML = '<p>No definition found.</p>';
+          dictDiv.innerHTML = '<p>No definitions found.</p>';
         }
       } catch (error) {
         console.error('Dictionary error:', error);
-        dictDiv.innerHTML = '<p>Could not fetch dictionary data.</p>';
+        dictDiv.innerHTML = '<p>Error fetching definition.</p>';
         dictDiv.style.display = 'block';
       }
     }
