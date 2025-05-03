@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MylesWeb</title>
+  <title>Search Engine</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     * {
@@ -20,6 +20,7 @@
       align-items: center;
       height: 100vh;
       flex-direction: column;
+      overflow-y: scroll;
     }
 
     .content {
@@ -28,12 +29,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-    }
-
-    h1 {
-      color: #0073aa;
-      font-size: 36px;
-      margin-bottom: 20px;
+      max-width: 1200px;
     }
 
     .search-container {
@@ -68,7 +64,6 @@
       display: flex;
       justify-content: space-between;
       width: 100%;
-      max-width: 1200px;
       margin-top: 40px;
     }
 
@@ -78,6 +73,8 @@
       background-color: #ffffff;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      max-height: 400px;
+      overflow-y: auto;
     }
 
     .summary-container {
@@ -86,6 +83,8 @@
       background-color: #ffffff;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      max-height: 400px;
+      overflow-y: auto;
     }
 
     .results-container h3 a,
@@ -157,7 +156,6 @@
   <div id="frog"></div>
   
   <div class="content" id="mainContent">
-    <h1>MylesWeb</h1>
     <div class="search-container">
       <input type="text" id="searchQuery" placeholder="Search...">
       <button class="search-button" onclick="search()">Search</button>
