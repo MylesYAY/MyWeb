@@ -1,188 +1,91 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Results - MylesWeb</title>
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f9f9f9;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const query = urlParams.get('q');
+
+  // Easter Egg check
+  if (query && (query.toLowerCase() === 'ralph' || query.toLowerCase() === 'ralphie')) {
+    triggerFrogEasterEgg();
+  } else {
+    fetchResults();
+    fetchWikipedia();
+  }
+
+  function triggerFrogEasterEgg() {
+    const frogs = [];
+    const numFrogs = 15; // number of frogs to spawn
+
+    for (let i = 0; i < numFrogs; i++) {
+      const frog = document.createElement('img');
+      frog.src = 'frog.png'; // use your local frog.png
+      frog.style.position = 'fixed';
+      frog.style.width = '60px';
+      frog.style.left = Math.random() * window.innerWidth + 'px';
+      frog.style.top = Math.random() * window.innerHeight + 'px';
+      frog.style.transition = 'transform 1s ease-out, top 1s ease-out';
+      frog.style.zIndex = 9999;
+      document.body.appendChild(frog);
+      frogs.push(frog);
+
+      // make each frog jump randomly after a random delay
+      setTimeout(() => {
+        const jumpHeight = Math.random() * 150 + 50; // jump 50-200px
+        frog.style.top = (parseFloat(frog.style.top) - jumpHeight) + 'px';
+        frog.style.transform = `rotate(${Math.random() * 360}deg) scale(${0.8 + Math.random() * 0.4})`;
+      }, Math.random() * 1000);
     }
 
-    .search-bar {
-      display: flex;
-      padding: 20px;
-      background: white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      justify-content: center;
-    }
+    // redirect after 3 seconds
+    setTimeout(() => {
+      window.location.href = 'results.html?q=frog';
+    }, 3000);
+  }
 
-    .search-bar input[type="text"] {
-      padding: 12px;
-      width: 400px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      font-size: 16px;
-    }
-
-    .search-bar button {
-      padding: 12px 20px;
-      margin-left: 10px;
-      background-color: #0073aa;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    .main-content {
-      display: flex;
-      gap: 20px;
-      padding: 20px;
-    }
-
-    .results {
-      flex: 2;
-    }
-
-    .result-card {
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-
-    .result-card h3 {
-      margin: 0 0 8px;
-      font-size: 18px;
-      color: #0073aa;
-    }
-
-    .result-divider {
-      border-top: 1px solid #eee;
-      margin: 10px 0;
-    }
-
-    .result-content {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
-
-    .result-content img {
-      width: 80px;
-      height: auto;
-      border-radius: 8px;
-    }
-
-    .result-content p {
-      margin: 0;
-      font-size: 14px;
-      color: #333;
-    }
-
-    .sidebar {
-      flex: 1;
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-
-    @media (max-width: 768px) {
-      .main-content {
-        flex-direction: column;
-      }
-      .sidebar {
-        order: 2;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="search-bar">
-    <input type="text" id="searchInput">
-    <button onclick="doSearch()">Search</button>
-  </div>
-
-  <div class="main-content">
-    <div class="results" id="results"></div>
-    <div class="sidebar" id="sidebar">
-      <h3>Wikipedia Summary</h3>
-      <p>Loading summary...</p>
-    </div>
-  </div>
-
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const query = params.get('q');
-    document.getElementById('searchInput').value = query;
-
-    async function fetchResults() {
-      const resultsDiv = document.getElementById('results');
-      const response = await fetch(`https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`);
+  async function fetchResults() {
+    const resultsDiv = document.getElementById('results');
+    const apiUrl = `https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`;
+    try {
+      const response = await fetch(apiUrl);
       const data = await response.json();
+      resultsDiv.innerHTML = '';
 
-      if (data.items && data.items.length > 0) {
+      if (data.items) {
         data.items.forEach(item => {
-          let thumbnail = '';
-          if (item.pagemap && item.pagemap.cse_image && item.pagemap.cse_image.length > 0) {
-            thumbnail = item.pagemap.cse_image[0].src;
-          }
-
-          const card = document.createElement('div');
-          card.className = 'result-card';
-          card.innerHTML = `
+          const result = document.createElement('div');
+          result.className = 'result-item';
+          result.innerHTML = `
             <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
-            <div class="result-divider"></div>
-            <div class="result-content">
-              ${thumbnail ? `<img src="${thumbnail}" alt="Thumbnail">` : ''}
+            <div style="display: flex; gap: 10px;">
+              <img src="${item.image || 'default-thumb.png'}" alt="Thumbnail" style="width: 100px; height: auto; border-radius: 8px;">
               <p>${item.snippet}</p>
             </div>
           `;
-          resultsDiv.appendChild(card);
+          resultsDiv.appendChild(result);
         });
       } else {
         resultsDiv.innerHTML = '<p>No results found.</p>';
       }
+    } catch (error) {
+      console.error('Search error:', error);
+      resultsDiv.innerHTML = '<p>Something went wrong.</p>';
     }
+  }
 
-    async function fetchWikipedia() {
-      const sidebar = document.getElementById('sidebar');
-      try {
-        const wikiResponse = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
-        const wikiData = await wikiResponse.json();
-
-        if (wikiData.extract) {
-          sidebar.innerHTML = `<h3>${wikiData.title}</h3><p>${wikiData.extract}</p>`;
-          if (wikiData.thumbnail && wikiData.thumbnail.source) {
-            sidebar.innerHTML = `<img src="${wikiData.thumbnail.source}" alt="Wikipedia Image" style="width:100%;border-radius:8px;margin-bottom:10px;">` + sidebar.innerHTML;
-          }
-        } else {
-          sidebar.innerHTML = `<p>No Wikipedia summary found.</p>`;
-        }
-      } catch (err) {
-        sidebar.innerHTML = `<p>Error loading Wikipedia summary.</p>`;
+  async function fetchWikipedia() {
+    const wikiDiv = document.getElementById('wikipedia');
+    const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+    try {
+      const response = await fetch(wikiApiUrl);
+      const data = await response.json();
+      if (data && data.extract) {
+        wikiDiv.innerHTML = `
+          <h3>${data.title}</h3>
+          <p>${data.extract}</p>
+          <a href="${data.content_urls.desktop.page}" target="_blank">Read more on Wikipedia</a>
+        `;
       }
+    } catch (error) {
+      console.error('Wikipedia error:', error);
+      wikiDiv.innerHTML = '';
     }
-
-    function doSearch() {
-      const newQuery = document.getElementById('searchInput').value.trim();
-      if (newQuery) {
-        window.location.href = `results.html?q=${encodeURIComponent(newQuery)}`;
-      }
-    }
-
-    fetchResults();
-    fetchWikipedia();
-  </script>
-</body>
-</html>
+  }
+</script>
