@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Search Engine</title>
+  <title>MylesWeb - Home</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     * {
@@ -17,8 +17,8 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
       flex-direction: column;
+      height: 100vh;
     }
 
     .content {
@@ -27,13 +27,19 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      max-width: 1200px;
+    }
+
+    h1 {
+      color: #0073aa;
+      font-size: 36px;
+      margin-bottom: 20px;
     }
 
     .search-container {
       display: flex;
       gap: 10px;
       margin-bottom: 20px;
+      justify-content: center;
     }
 
     input[type="text"] {
@@ -41,7 +47,6 @@
       border-radius: 10px;
       border: 1px solid #ccc;
       width: 300px;
-      font-size: 16px;
     }
 
     .search-button {
@@ -61,12 +66,23 @@
 </head>
 <body>
   <div class="content" id="mainContent">
+    <h1>Search MylesWeb</h1>
     <div class="search-container">
-      <form action="results.html" method="get">
-        <input type="text" name="query" id="searchQuery" placeholder="Search..." required>
-        <button type="submit" class="search-button">Search</button>
-      </form>
+      <input type="text" id="searchQuery" placeholder="Search...">
+      <button class="search-button" onclick="search()">Search</button>
     </div>
   </div>
+
+  <script>
+    function search() {
+      const query = document.getElementById('searchQuery').value.trim();
+      if (query) {
+        // Redirect to results page with the query parameter in the URL
+        window.location.href = `results.html?query=${encodeURIComponent(query)}`;
+      } else {
+        alert("Please enter a search term!");
+      }
+    }
+  </script>
 </body>
 </html>
