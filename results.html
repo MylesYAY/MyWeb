@@ -2,160 +2,122 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Search Results</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MylesWeb</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f9f9f9;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      height: 100vh;
-      overflow-y: scroll;
-    }
-
+    /* Basic styling for the page */
     .content {
-      width: 100%;
-      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      max-width: 1200px;
-    }
-
-    .results-summary-container {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      margin-top: 40px;
     }
 
     .results-container {
-      width: 48%;
-      padding: 20px;
-      background-color: #ffffff;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      max-height: 400px;
-      overflow-y: auto;
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
     }
 
-    .summary-container {
-      width: 48%;
-      padding: 20px;
-      background-color: #ffffff;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      max-height: 400px;
-      overflow-y: auto;
-    }
-
-    .results-container h3 a,
-    .summary-container h3 a {
-      text-decoration: none;
-      color: #0073aa;
-      font-size: 18px;
-    }
-
-    .results-container p,
-    .summary-container p {
-      color: #333;
-      font-size: 14px;
-    }
-
-    .results-container div,
-    .summary-container div {
-      margin-bottom: 15px;
-      padding: 15px;
-      border: 1px solid #ddd;
+    .note-container {
+      width: 200px;
+      background-color: #f4f4f4;
+      padding: 10px;
       border-radius: 8px;
-      background-color: #fff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
-    .results-container div:hover,
-    .summary-container div:hover {
-      background-color: #f1f1f1;
+    .note-item {
+      margin-bottom: 10px;
+      padding: 8px;
+      background-color: #fff;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .add-note-btn {
+      margin-top: 10px;
+      background-color: #0073aa;
+      color: white;
+      padding: 8px;
+      border-radius: 5px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <div class="content" id="mainContent">
-    <h1>Results for: <span id="searchTerm"></span></h1>
-
-    <div class="results-summary-container">
-      <div class="results-container" id="results"></div>
-      <div class="summary-container" id="summary"></div>
+  <div class="content">
+    <h1>MylesWeb</h1>
+    <div class="results-container" id="resultsContainer">
+      <!-- Results will go here -->
+    </div>
+    <div class="note-container" id="noteContainer">
+      <h3>Recent Notes</h3>
+      <div id="noteList"></div>
+      <button class="add-note-btn" onclick="openNoteDialog()">Add Note</button>
     </div>
   </div>
 
-<script>
-  // Get the search query from the URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const query = urlParams.get('query');
-  
-  if (!query) {
-    alert("No search query found!");
-    window.location.href = "index.html";  // Redirect to home if no query is found
-  }
-
-  // Display the search term at the top
-  document.getElementById('searchTerm').textContent = query;
-
-  // Perform the search
-  async function search(query) {
-    const resultsDiv = document.getElementById('results');
-    const summaryDiv = document.getElementById('summary');
-    
-    // Clear previous results
-    resultsDiv.innerHTML = '';
-    summaryDiv.innerHTML = '';
-
-    // Fetch search results
-    const url = `https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`;
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
-      if (data.items) {
-        resultsDiv.style.display = 'block';
-        data.items.forEach(item => {
-          const result = document.createElement('div');
-          result.innerHTML = `<h3><a href="${item.link}" target="_blank">${item.title}</a></h3><p>${item.snippet}</p>`;
-          resultsDiv.appendChild(result);
-        });
-      } else {
-        resultsDiv.innerHTML = '<p>No results found.</p>';
-        resultsDiv.style.display = 'block';
-      }
-
-      // Fetch Wikipedia summary for the right-side summary section
-      const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
-      const wikiResponse = await fetch(wikiApiUrl);
-      const wikiData = await wikiResponse.json();
-      if (wikiData && wikiData.extract) {
-        summaryDiv.style.display = 'block';
-        summaryDiv.innerHTML = `<h3>Wikipedia Summary:</h3><p>${wikiData.extract}</p><a href="${wikiData.content_urls.desktop.page}" target="_blank">Read more on Wikipedia</a>`;
-      } else {
-        summaryDiv.innerHTML = '<p>No Wikipedia summary found.</p>';
-      }
+  <script>
+    // Function to load and display results
+    async function loadResults(query) {
+      const resultsDiv = document.getElementById("resultsContainer");
+      const noteListDiv = document.getElementById("noteList");
       
-    } catch (error) {
-      console.error('Search error:', error);
-      resultsDiv.innerHTML = '<p>Something went wrong.</p>';
-      resultsDiv.style.display = 'block';
-    }
-  }
+      // Sample results data (this would normally come from your API)
+      const results = [
+        { title: "Some Topic 1", snippet: "Some description about topic 1...", link: "#", thumbnail: "thumbnail1.png" },
+        { title: "Some Topic 2", snippet: "Some description about topic 2...", link: "#", thumbnail: "thumbnail2.png" }
+      ];
 
-  // Run the search function
-  search(query);
-</script>
+      resultsDiv.innerHTML = ""; // Clear previous results
+      results.forEach((result, index) => {
+        const resultDiv = document.createElement("div");
+        resultDiv.classList.add("result-item");
+        resultDiv.innerHTML = `
+          <h3><a href="${result.link}">${result.title}</a></h3>
+          <p>${result.snippet}</p>
+          <img src="${result.thumbnail}" alt="Thumbnail" width="50" />
+          <button onclick="addNoteToSelection(${index}, '${result.snippet}')">Add Note</button>
+        `;
+        resultsDiv.appendChild(resultDiv);
+      });
+
+      // Load recent notes from local storage
+      const notes = JSON.parse(localStorage.getItem("notes") || "[]");
+      noteListDiv.innerHTML = "";
+      notes.slice(0, 3).forEach(note => {
+        const noteItem = document.createElement("div");
+        noteItem.classList.add("note-item");
+        noteItem.innerHTML = `
+          <strong>${note.title}</strong>
+          <p>${note.content}</p>
+        `;
+        noteListDiv.appendChild(noteItem);
+      });
+    }
+
+    // Function to add a note to local storage
+    function addNoteToSelection(index, content) {
+      const title = `Note ${index + 1}`;
+      const notes = JSON.parse(localStorage.getItem("notes") || "[]");
+      notes.push({ title, content });
+      localStorage.setItem("notes", JSON.stringify(notes));
+
+      // Update the recent notes displayed
+      loadResults();
+    }
+
+    // Function to open the add note dialog
+    function openNoteDialog() {
+      const noteContent = prompt("Select some text to save as a note:");
+      if (noteContent) {
+        addNoteToSelection(Date.now(), noteContent);
+      }
+    }
+
+    // Load initial results (for example, searching for a query)
+    loadResults("search query");
+  </script>
 </body>
 </html>
