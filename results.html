@@ -102,6 +102,11 @@
   const urlParams = new URLSearchParams(window.location.search);
   const query = urlParams.get('query');
   
+  if (!query) {
+    alert("No search query found!");
+    window.location.href = "index.html";  // Redirect to home if no query is found
+  }
+
   // Display the search term at the top
   document.getElementById('searchTerm').textContent = query;
 
