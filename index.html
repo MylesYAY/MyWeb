@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MylesWeb - Home</title>
+  <title>MylesWeb</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     * {
@@ -15,15 +15,16 @@
       background-color: #f9f9f9;
       margin: 0;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
       height: 100vh;
+      justify-content: center;
+      align-items: flex-start;
+      flex-direction: column;
     }
 
     .content {
+      flex: 1;
+      padding: 40px;
       width: 100%;
-      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -39,6 +40,7 @@
       display: flex;
       gap: 10px;
       margin-bottom: 20px;
+      flex-wrap: wrap;
       justify-content: center;
     }
 
@@ -62,27 +64,119 @@
     .search-button:hover {
       background-color: #005c8c;
     }
+
+    .results-container {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .results-column {
+      width: 48%;
+    }
+
+    .result {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .result-thumbnail img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .result-info {
+      flex: 1;
+    }
+
+    .result-info h3 {
+      margin: 0;
+      font-size: 18px;
+      color: #0073aa;
+    }
+
+    .result-info p {
+      margin-top: 5px;
+      color: #333;
+    }
+
+    #results {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
   </style>
 </head>
 <body>
+
   <div class="content" id="mainContent">
-    <h1>Search MylesWeb</h1>
+    <h1>MylesWeb</h1>
+    
     <div class="search-container">
       <input type="text" id="searchQuery" placeholder="Search...">
       <button class="search-button" onclick="search()">Search</button>
     </div>
+
+    <div class="results-container">
+      <div class="results-column" id="results"></div>
+    </div>
   </div>
 
   <script>
-    function search() {
+    async function search() {
       const query = document.getElementById('searchQuery').value.trim();
-      if (query) {
-        // Redirect to results page with the query parameter in the URL
-        window.location.href = `results.html?query=${encodeURIComponent(query)}`;
-      } else {
-        alert("Please enter a search term!");
+      const resultsDiv = document.getElementById('results');
+
+      if (!query) {
+        resultsDiv.innerHTML = '<p>Please enter a search query.</p>';
+        return;
+      }
+
+      try {
+        // Call your Cloudflare Worker with the query
+        const response = await fetch(`https://bob.mylesjohn2012.workers.dev/search?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        if (data.length === 0) {
+          resultsDiv.innerHTML = '<p>No results found.</p>';
+          return;
+        }
+
+        // Clear any previous results
+        resultsDiv.innerHTML = '';
+
+        // Loop through the results and display them
+        data.forEach(item => {
+          const resultElement = document.createElement('div');
+          resultElement.classList.add('result');
+
+          resultElement.innerHTML = `
+            <div class="result-thumbnail">
+              <img src="${item.thumbnail}" alt="${item.title}">
+            </div>
+            <div class="result-info">
+              <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+              <p>${item.snippet}</p>
+            </div>
+          `;
+
+          resultsDiv.appendChild(resultElement);
+        });
+      } catch (error) {
+        console.error('Error fetching search results:', error);
+        resultsDiv.innerHTML = '<p>Something went wrong. Please try again later.</p>';
       }
     }
   </script>
+
 </body>
 </html>
