@@ -19,6 +19,7 @@
       justify-content: center;
       align-items: center;
       flex-direction: column;
+      overflow: hidden;
     }
 
     .content {
@@ -49,6 +50,7 @@
       border-radius: 10px;
       border: 1px solid #ccc;
       width: 300px;
+      font-size: 16px;
     }
 
     .search-button {
@@ -75,7 +77,7 @@
       background-size: cover;
       background-position: center;
       border-radius: 50%;
-      animation: wildJump 5s ease-in-out forwards; /* Stop after 5 seconds */
+      animation: wildJump 5s ease-in-out forwards;
       display: none;
     }
 
@@ -97,7 +99,7 @@
       }
       100% {
         transform: translateX(-150%) translateY(-300px) rotate(360deg);
-        opacity: 0; /* Fade out at the end */
+        opacity: 0;
       }
     }
 
@@ -112,17 +114,14 @@
       width: 48%;
     }
 
-    #results,
-    #dictionaryResults {
+    #results {
       background-color: #ffffff;
       border-radius: 12px;
       padding: 20px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      display: none;
     }
 
-    #results div,
-    #dictionaryResults div {
+    #results div {
       margin-bottom: 15px;
       padding: 15px;
       border: 1px solid #ddd;
@@ -131,23 +130,40 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
-    #results h3 a,
+    #results h3 a {
+      text-decoration: none;
+      color: #0073aa;
+      font-size: 18px;
+    }
+
+    #results p {
+      color: #333;
+      font-size: 14px;
+    }
+
+    #results div:hover {
+      background-color: #f1f1f1;
+    }
+
+    #dictionaryResults {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      display: none;
+    }
+
     #dictionaryResults h3 a {
       text-decoration: none;
       color: #0073aa;
       font-size: 18px;
     }
 
-    #results p,
     #dictionaryResults p {
       color: #333;
       font-size: 14px;
     }
 
-    #results div:hover,
-    #dictionaryResults div:hover {
-      background-color: #f1f1f1;
-    }
   </style>
 </head>
 <body>
@@ -162,6 +178,7 @@
 
     <div class="results-container">
       <div class="results-column" id="results"></div>
+      <div class="results-column" id="dictionaryResults"></div>
     </div>
   </div>
 
@@ -169,11 +186,12 @@
   const frog = document.getElementById('frog');
   
   async function search() {
-    const query = document.getElementById('searchQuery').value.toLowerCase();  // Convert to lowercase for case-insensitive check
+    const query = document.getElementById('searchQuery').value.toLowerCase();
     const resultsDiv = document.getElementById('results');
+    const dictionaryResultsDiv = document.getElementById('dictionaryResults');
     
     if (query === 'frog') {
-      // Show frog and start the jump animation
+      // Show frog and start jumping animation
       frog.style.display = 'block';
       
       // Wait for frog to finish jumping out before showing frog-related results
@@ -195,12 +213,13 @@
         }
       }, 5000); // Adjust time to match frog animation duration
     } else {
-      // Handle regular search
+      // Regular search behavior
       const url = `https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`;
       try {
         const response = await fetch(url);
         const data = await response.json();
         resultsDiv.innerHTML = '';
+        dictionaryResultsDiv.innerHTML = '';
         
         if (data.items) {
           resultsDiv.style.display = 'block';
@@ -213,6 +232,24 @@
           resultsDiv.innerHTML = '<p>No results found.</p>';
           resultsDiv.style.display = 'block';
         }
+
+        // Fetch Wikipedia summary for dictionary section
+        const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+        try {
+          const wikiResponse = await fetch(wikiApiUrl);
+          const wikiData = await wikiResponse.json();
+          
+          if (wikiData && wikiData.extract) {
+            dictionaryResultsDiv.style.display = 'block';
+            dictionaryResultsDiv.innerHTML = `<h3>Wikipedia Summary:</h3><p>${wikiData.extract}</p><a href="${wikiData.content_urls.desktop.page}" target="_blank">Read more on Wikipedia</a>`;
+          } else {
+            dictionaryResultsDiv.innerHTML = '<p>No Wikipedia summary found.</p>';
+          }
+        } catch (wikiError) {
+          console.error('Error fetching Wikipedia data:', wikiError);
+          dictionaryResultsDiv.innerHTML = '<p>Failed to fetch Wikipedia summary.</p>';
+        }
+        
       } catch (error) {
         console.error('Search error:', error);
         resultsDiv.innerHTML = '<p>Something went wrong.</p>';
