@@ -137,16 +137,15 @@
     const resultsDiv = document.getElementById('results');
     const summaryDiv = document.getElementById('summary');
     
-    // Ensure that the URL is properly encoded and valid
-    const url = `https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`;
+    // Clear previous results
+    resultsDiv.innerHTML = '';
+    summaryDiv.innerHTML = '';
 
     // Fetch search results
+    const url = `https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`;
     try {
       const response = await fetch(url);
       const data = await response.json();
-      resultsDiv.innerHTML = '';
-      summaryDiv.innerHTML = '';
-      
       if (data.items) {
         resultsDiv.style.display = 'block';
         data.items.forEach(item => {
@@ -161,19 +160,13 @@
 
       // Fetch Wikipedia summary for the right-side summary section
       const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
-      try {
-        const wikiResponse = await fetch(wikiApiUrl);
-        const wikiData = await wikiResponse.json();
-        
-        if (wikiData && wikiData.extract) {
-          summaryDiv.style.display = 'block';
-          summaryDiv.innerHTML = `<h3>Wikipedia Summary:</h3><p>${wikiData.extract}</p><a href="${wikiData.content_urls.desktop.page}" target="_blank">Read more on Wikipedia</a>`;
-        } else {
-          summaryDiv.innerHTML = '<p>No Wikipedia summary found.</p>';
-        }
-      } catch (wikiError) {
-        console.error('Error fetching Wikipedia data:', wikiError);
-        summaryDiv.innerHTML = '<p>Failed to fetch Wikipedia summary.</p>';
+      const wikiResponse = await fetch(wikiApiUrl);
+      const wikiData = await wikiResponse.json();
+      if (wikiData && wikiData.extract) {
+        summaryDiv.style.display = 'block';
+        summaryDiv.innerHTML = `<h3>Wikipedia Summary:</h3><p>${wikiData.extract}</p><a href="${wikiData.content_urls.desktop.page}" target="_blank">Read more on Wikipedia</a>`;
+      } else {
+        summaryDiv.innerHTML = '<p>No Wikipedia summary found.</p>';
       }
       
     } catch (error) {
@@ -182,7 +175,6 @@
       resultsDiv.style.display = 'block';
     }
   }
-
 </script>
 </body>
 </html>
