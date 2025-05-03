@@ -3,186 +3,217 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MylesWeb Search Results</title>
+  <title>MylesWeb - Results</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
       background-color: #f9f9f9;
       margin: 0;
-      padding: 20px;
+      padding: 0;
     }
-    h1 {
-      color: #0073aa;
+
+    header {
+      background-color: #0073aa;
+      color: white;
+      padding: 20px;
       text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
-    .results-container {
+
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .search-bar {
+      margin-top: 10px;
       display: flex;
-      max-width: 1200px;
-      margin: 0 auto;
-      gap: 20px;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    .results {
-      flex: 2;
-      background: #fff;
+
+    .search-bar input[type="text"] {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      width: 300px;
+    }
+
+    .search-bar button {
+      padding: 12px 20px;
+      background-color: white;
+      color: #0073aa;
+      border: 2px solid #0073aa;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .search-bar button:hover {
+      background-color: #0073aa;
+      color: white;
+    }
+
+    .main-content {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
       padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      flex-wrap: wrap;
     }
-    .wiki-summary {
+
+    .results-column {
       flex: 1;
-      background: #fff;
-      padding: 20px;
+      min-width: 300px;
+      max-width: 700px;
+      margin: 10px;
+      background-color: #fff;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    .result-item {
+
+    .results-column div {
       margin-bottom: 20px;
-      border-bottom: 1px solid #ddd;
       padding-bottom: 20px;
+      border-bottom: 1px solid #ddd;
     }
+
+    .results-column div:last-child {
+      border-bottom: none;
+    }
+
     .result-title {
       font-size: 20px;
-      font-weight: 600;
-      color: #0073aa;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
     }
-    .result-content {
-      display: flex;
-      align-items: flex-start;
-      gap: 15px;
-    }
+
     .result-thumbnail {
-      width: 100px;
-      height: 100px;
+      width: 100%;
+      max-height: 200px;
       object-fit: cover;
       border-radius: 8px;
-      background: #eee;
+      margin-bottom: 10px;
     }
-    .result-description {
-      flex: 1;
-      color: #333;
+
+    .result-desc {
       font-size: 14px;
+      color: #333;
+    }
+
+    .wiki-sidebar {
+      flex: 0 0 300px;
+      margin: 10px;
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-height: fit-content;
+    }
+
+    #frog, #ralph {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 80px;
+      height: 80px;
+      background-image: url('frog.png');
+      background-size: cover;
+      background-position: center;
+      display: none;
+      animation: wildJump 5s ease-in-out forwards;
+    }
+
+    @keyframes wildJump {
+      0% { transform: translateX(-50%) translateY(0) rotate(0deg); }
+      20% { transform: translateX(-50%) translateY(-100px) rotate(45deg); }
+      40% { transform: translateX(150%) translateY(-150px) rotate(-45deg); }
+      60% { transform: translateX(-100%) translateY(-200px) rotate(90deg); }
+      80% { transform: translateX(80%) translateY(-100px) rotate(-90deg); }
+      100% { transform: translateX(-150%) translateY(-300px) rotate(360deg); opacity: 0; }
     }
   </style>
 </head>
 <body>
 
-  <h1>Search Results</h1>
-  <div class="results-container">
-    <div class="results" id="results"></div>
-    <div class="wiki-summary" id="wikiSummary"></div>
+<header>
+  <h1>MylesWeb</h1>
+  <div class="search-bar">
+    <input type="text" id="searchQuery" placeholder="Search...">
+    <button onclick="search()">Search</button>
   </div>
+</header>
 
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const query = urlParams.get('q');
+<div id="frog"></div>
 
+<div class="main-content">
+  <div class="results-column" id="results"></div>
+  <div class="wiki-sidebar" id="wikiSidebar"></div>
+</div>
+
+<script>
+  const frog = document.getElementById('frog');
+  const wikiSidebar = document.getElementById('wikiSidebar');
+
+  async function search() {
+    const query = document.getElementById('searchQuery').value.toLowerCase();
     const resultsDiv = document.getElementById('results');
-    const wikiDiv = document.getElementById('wikiSummary');
+    resultsDiv.innerHTML = '';
+    wikiSidebar.innerHTML = '';
 
-    async function fetchSearchResults() {
-      try {
-        const apiUrl = `https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`;
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-
-        resultsDiv.innerHTML = '';
-
-        if (data.items && data.items.length > 0) {
-          data.items.forEach(item => {
-            const resultItem = document.createElement('div');
-            resultItem.classList.add('result-item');
-
-            const title = `<div class="result-title"><a href="${item.link}" target="_blank">${item.title}</a></div>`;
-            const content = `
-              <div class="result-content">
-                ${item.pagemap?.cse_thumbnail ? `<img src="${item.pagemap.cse_thumbnail[0].src}" class="result-thumbnail">` : ''}
-                <div class="result-description">${item.snippet}</div>
-              </div>
-            `;
-
-            resultItem.innerHTML = title + content;
-            resultsDiv.appendChild(resultItem);
-          });
-        } else {
-          resultsDiv.innerHTML = '<p>No results found.</p>';
-        }
-      } catch (err) {
-        console.error('Search error:', err);
-        resultsDiv.innerHTML = '<p>Something went wrong.</p>';
-      }
+    if (query === 'frog') {
+      frog.style.display = 'block';
+      setTimeout(() => { frog.style.display = 'none'; }, 5000);
     }
 
-    async function fetchWikipediaSummary() {
-      try {
-        const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
-        const response = await fetch(wikiApiUrl);
-        const data = await response.json();
+    const searchUrl = `https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`;
+    const wikiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
 
-        if (data.extract) {
-          wikiDiv.innerHTML = `<h3>${data.title}</h3><p>${data.extract}</p><a href="${data.content_urls.desktop.page}" target="_blank">Read more on Wikipedia</a>`;
-        } else {
-          wikiDiv.innerHTML = '<p>No summary found.</p>';
-        }
-      } catch (err) {
-        console.error('Wikipedia error:', err);
-        wikiDiv.innerHTML = '<p>Could not load Wikipedia summary.</p>';
-      }
-    }
+    try {
+      const [searchResponse, wikiResponse] = await Promise.all([
+        fetch(searchUrl).then(res => res.json()),
+        fetch(wikiUrl).then(res => res.json())
+      ]);
 
-    fetchSearchResults();
-    fetchWikipediaSummary();
-
-    // FROG + RALPH ANIMATION IF QUERY IS "frog"
-    if (query && query.toLowerCase() === 'frog') {
-      spawnFrogsAndRalphs();
-    }
-
-    function spawnFrogsAndRalphs() {
-      const numFrogs = 10;
-      const numRalphs = 5;
-
-      for (let i = 0; i < numFrogs; i++) {
-        const frog = document.createElement('img');
-        frog.src = 'frog.png';
-        frog.style.position = 'fixed';
-        frog.style.width = '60px';
-        frog.style.left = Math.random() * window.innerWidth + 'px';
-        frog.style.top = Math.random() * window.innerHeight + 'px';
-        frog.style.transition = 'transform 1s ease-in-out, top 1s ease-in-out, left 1s ease-in-out';
-        frog.style.zIndex = 9999;
-        document.body.appendChild(frog);
-        animateRandomly(frog);
+      if (searchResponse.items) {
+        searchResponse.items.forEach(item => {
+          const resultDiv = document.createElement('div');
+          resultDiv.innerHTML = `
+            <div class="result-title"><a href="${item.link}" target="_blank">${item.title}</a></div>
+            ${item.thumbnail ? `<img src="${item.thumbnail}" class="result-thumbnail">` : ''}
+            <div class="result-desc">${item.snippet}</div>
+          `;
+          resultsDiv.appendChild(resultDiv);
+        });
+      } else {
+        resultsDiv.innerHTML = '<p>No results found.</p>';
       }
 
-      for (let i = 0; i < numRalphs; i++) {
-        const ralph = document.createElement('div');
-        ralph.textContent = 'ralph';
-        ralph.style.position = 'fixed';
-        ralph.style.fontSize = '24px';
-        ralph.style.fontWeight = 'bold';
-        ralph.style.color = '#ff00ff';
-        ralph.style.left = Math.random() * window.innerWidth + 'px';
-        ralph.style.top = Math.random() * window.innerHeight + 'px';
-        ralph.style.transition = 'transform 1s ease-in-out, top 1s ease-in-out, left 1s ease-in-out';
-        ralph.style.zIndex = 9999;
-        document.body.appendChild(ralph);
-        animateRandomly(ralph);
+      if (wikiResponse.extract) {
+        wikiSidebar.innerHTML = `
+          <h3>${wikiResponse.title}</h3>
+          <p>${wikiResponse.extract}</p>
+          <a href="${wikiResponse.content_urls.desktop.page}" target="_blank">Read more</a>
+        `;
+      } else {
+        wikiSidebar.innerHTML = '<p>No Wikipedia summary found.</p>';
       }
+    } catch (error) {
+      console.error('Search error:', error);
+      resultsDiv.innerHTML = '<p>Error fetching search results.</p>';
+      wikiSidebar.innerHTML = '<p>Error fetching Wikipedia summary.</p>';
     }
-
-    function animateRandomly(element) {
-      setInterval(() => {
-        const newTop = Math.random() * (window.innerHeight - 50);
-        const newLeft = Math.random() * (window.innerWidth - 50);
-        const rotation = Math.random() * 360;
-        element.style.top = `${newTop}px`;
-        element.style.left = `${newLeft}px`;
-        element.style.transform = `rotate(${rotation}deg) scale(${0.8 + Math.random() * 0.4})`;
-      }, 1500);
-    }
-  </script>
+  }
+</script>
 
 </body>
 </html>
