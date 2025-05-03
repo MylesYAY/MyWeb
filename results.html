@@ -1,91 +1,188 @@
-<script>
-  const urlParams = new URLSearchParams(window.location.search);
-  const query = urlParams.get('q');
-
-  // Easter Egg check
-  if (query && (query.toLowerCase() === 'ralph' || query.toLowerCase() === 'ralphie')) {
-    triggerFrogEasterEgg();
-  } else {
-    fetchResults();
-    fetchWikipedia();
-  }
-
-  function triggerFrogEasterEgg() {
-    const frogs = [];
-    const numFrogs = 15; // number of frogs to spawn
-
-    for (let i = 0; i < numFrogs; i++) {
-      const frog = document.createElement('img');
-      frog.src = 'frog.png'; // use your local frog.png
-      frog.style.position = 'fixed';
-      frog.style.width = '60px';
-      frog.style.left = Math.random() * window.innerWidth + 'px';
-      frog.style.top = Math.random() * window.innerHeight + 'px';
-      frog.style.transition = 'transform 1s ease-out, top 1s ease-out';
-      frog.style.zIndex = 9999;
-      document.body.appendChild(frog);
-      frogs.push(frog);
-
-      // make each frog jump randomly after a random delay
-      setTimeout(() => {
-        const jumpHeight = Math.random() * 150 + 50; // jump 50-200px
-        frog.style.top = (parseFloat(frog.style.top) - jumpHeight) + 'px';
-        frog.style.transform = `rotate(${Math.random() * 360}deg) scale(${0.8 + Math.random() * 0.4})`;
-      }, Math.random() * 1000);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MylesWeb Search Results</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 20px;
     }
+    h1 {
+      color: #0073aa;
+      text-align: center;
+    }
+    .results-container {
+      display: flex;
+      max-width: 1200px;
+      margin: 0 auto;
+      gap: 20px;
+    }
+    .results {
+      flex: 2;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .wiki-summary {
+      flex: 1;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .result-item {
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 20px;
+    }
+    .result-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #0073aa;
+      margin-bottom: 10px;
+    }
+    .result-content {
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+    }
+    .result-thumbnail {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #eee;
+    }
+    .result-description {
+      flex: 1;
+      color: #333;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
 
-    // redirect after 3 seconds
-    setTimeout(() => {
-      window.location.href = 'results.html?q=frog';
-    }, 3000);
-  }
+  <h1>Search Results</h1>
+  <div class="results-container">
+    <div class="results" id="results"></div>
+    <div class="wiki-summary" id="wikiSummary"></div>
+  </div>
 
-  async function fetchResults() {
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const query = urlParams.get('q');
+
     const resultsDiv = document.getElementById('results');
-    const apiUrl = `https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`;
-    try {
-      const response = await fetch(apiUrl);
-      const data = await response.json();
-      resultsDiv.innerHTML = '';
+    const wikiDiv = document.getElementById('wikiSummary');
 
-      if (data.items) {
-        data.items.forEach(item => {
-          const result = document.createElement('div');
-          result.className = 'result-item';
-          result.innerHTML = `
-            <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
-            <div style="display: flex; gap: 10px;">
-              <img src="${item.image || 'default-thumb.png'}" alt="Thumbnail" style="width: 100px; height: auto; border-radius: 8px;">
-              <p>${item.snippet}</p>
-            </div>
-          `;
-          resultsDiv.appendChild(result);
-        });
-      } else {
-        resultsDiv.innerHTML = '<p>No results found.</p>';
-      }
-    } catch (error) {
-      console.error('Search error:', error);
-      resultsDiv.innerHTML = '<p>Something went wrong.</p>';
-    }
-  }
+    async function fetchSearchResults() {
+      try {
+        const apiUrl = `https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`;
+        const response = await fetch(apiUrl);
+        const data = await response.json();
 
-  async function fetchWikipedia() {
-    const wikiDiv = document.getElementById('wikipedia');
-    const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
-    try {
-      const response = await fetch(wikiApiUrl);
-      const data = await response.json();
-      if (data && data.extract) {
-        wikiDiv.innerHTML = `
-          <h3>${data.title}</h3>
-          <p>${data.extract}</p>
-          <a href="${data.content_urls.desktop.page}" target="_blank">Read more on Wikipedia</a>
-        `;
+        resultsDiv.innerHTML = '';
+
+        if (data.items && data.items.length > 0) {
+          data.items.forEach(item => {
+            const resultItem = document.createElement('div');
+            resultItem.classList.add('result-item');
+
+            const title = `<div class="result-title"><a href="${item.link}" target="_blank">${item.title}</a></div>`;
+            const content = `
+              <div class="result-content">
+                ${item.pagemap?.cse_thumbnail ? `<img src="${item.pagemap.cse_thumbnail[0].src}" class="result-thumbnail">` : ''}
+                <div class="result-description">${item.snippet}</div>
+              </div>
+            `;
+
+            resultItem.innerHTML = title + content;
+            resultsDiv.appendChild(resultItem);
+          });
+        } else {
+          resultsDiv.innerHTML = '<p>No results found.</p>';
+        }
+      } catch (err) {
+        console.error('Search error:', err);
+        resultsDiv.innerHTML = '<p>Something went wrong.</p>';
       }
-    } catch (error) {
-      console.error('Wikipedia error:', error);
-      wikiDiv.innerHTML = '';
     }
-  }
-</script>
+
+    async function fetchWikipediaSummary() {
+      try {
+        const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+        const response = await fetch(wikiApiUrl);
+        const data = await response.json();
+
+        if (data.extract) {
+          wikiDiv.innerHTML = `<h3>${data.title}</h3><p>${data.extract}</p><a href="${data.content_urls.desktop.page}" target="_blank">Read more on Wikipedia</a>`;
+        } else {
+          wikiDiv.innerHTML = '<p>No summary found.</p>';
+        }
+      } catch (err) {
+        console.error('Wikipedia error:', err);
+        wikiDiv.innerHTML = '<p>Could not load Wikipedia summary.</p>';
+      }
+    }
+
+    fetchSearchResults();
+    fetchWikipediaSummary();
+
+    // FROG + RALPH ANIMATION IF QUERY IS "frog"
+    if (query && query.toLowerCase() === 'frog') {
+      spawnFrogsAndRalphs();
+    }
+
+    function spawnFrogsAndRalphs() {
+      const numFrogs = 10;
+      const numRalphs = 5;
+
+      for (let i = 0; i < numFrogs; i++) {
+        const frog = document.createElement('img');
+        frog.src = 'frog.png';
+        frog.style.position = 'fixed';
+        frog.style.width = '60px';
+        frog.style.left = Math.random() * window.innerWidth + 'px';
+        frog.style.top = Math.random() * window.innerHeight + 'px';
+        frog.style.transition = 'transform 1s ease-in-out, top 1s ease-in-out, left 1s ease-in-out';
+        frog.style.zIndex = 9999;
+        document.body.appendChild(frog);
+        animateRandomly(frog);
+      }
+
+      for (let i = 0; i < numRalphs; i++) {
+        const ralph = document.createElement('div');
+        ralph.textContent = 'ralph';
+        ralph.style.position = 'fixed';
+        ralph.style.fontSize = '24px';
+        ralph.style.fontWeight = 'bold';
+        ralph.style.color = '#ff00ff';
+        ralph.style.left = Math.random() * window.innerWidth + 'px';
+        ralph.style.top = Math.random() * window.innerHeight + 'px';
+        ralph.style.transition = 'transform 1s ease-in-out, top 1s ease-in-out, left 1s ease-in-out';
+        ralph.style.zIndex = 9999;
+        document.body.appendChild(ralph);
+        animateRandomly(ralph);
+      }
+    }
+
+    function animateRandomly(element) {
+      setInterval(() => {
+        const newTop = Math.random() * (window.innerHeight - 50);
+        const newLeft = Math.random() * (window.innerWidth - 50);
+        const rotation = Math.random() * 360;
+        element.style.top = `${newTop}px`;
+        element.style.left = `${newLeft}px`;
+        element.style.transform = `rotate(${rotation}deg) scale(${0.8 + Math.random() * 0.4})`;
+      }, 1500);
+    }
+  </script>
+
+</body>
+</html>
