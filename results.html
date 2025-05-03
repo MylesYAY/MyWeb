@@ -2,122 +2,142 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MylesWeb</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Search Results | MylesWeb</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    /* Basic styling for the page */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      justify-content: flex-start;
+      flex-direction: column;
+    }
+
     .content {
+      padding: 40px;
+      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
-    .results-container {
-      display: flex;
-      gap: 20px;
+    h1 {
+      color: #0073aa;
+      font-size: 36px;
       margin-bottom: 20px;
     }
 
-    .note-container {
-      width: 200px;
-      background-color: #f4f4f4;
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    .results-container {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 1200px;
     }
 
-    .note-item {
-      margin-bottom: 10px;
-      padding: 8px;
+    .results-column {
+      width: 48%;
+    }
+
+    .result {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 15px;
       background-color: #fff;
-      border-radius: 5px;
-      border: 1px solid #ddd;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
-    .add-note-btn {
-      margin-top: 10px;
-      background-color: #0073aa;
-      color: white;
-      padding: 8px;
-      border-radius: 5px;
-      cursor: pointer;
+    .result-thumbnail img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .result-info {
+      flex: 1;
+    }
+
+    .result-info h3 {
+      margin: 0;
+      font-size: 18px;
+      color: #0073aa;
+    }
+
+    .result-info p {
+      margin-top: 5px;
+      color: #333;
     }
   </style>
 </head>
 <body>
-  <div class="content">
-    <h1>MylesWeb</h1>
-    <div class="results-container" id="resultsContainer">
-      <!-- Results will go here -->
-    </div>
-    <div class="note-container" id="noteContainer">
-      <h3>Recent Notes</h3>
-      <div id="noteList"></div>
-      <button class="add-note-btn" onclick="openNoteDialog()">Add Note</button>
+
+  <div class="content" id="mainContent">
+    <h1>Search Results</h1>
+    
+    <div class="results-container">
+      <div class="results-column" id="results"></div>
     </div>
   </div>
 
   <script>
-    // Function to load and display results
-    async function loadResults(query) {
-      const resultsDiv = document.getElementById("resultsContainer");
-      const noteListDiv = document.getElementById("noteList");
-      
-      // Sample results data (this would normally come from your API)
-      const results = [
-        { title: "Some Topic 1", snippet: "Some description about topic 1...", link: "#", thumbnail: "thumbnail1.png" },
-        { title: "Some Topic 2", snippet: "Some description about topic 2...", link: "#", thumbnail: "thumbnail2.png" }
-      ];
+    async function fetchSearchResults(query) {
+      const resultsDiv = document.getElementById('results');
 
-      resultsDiv.innerHTML = ""; // Clear previous results
-      results.forEach((result, index) => {
-        const resultDiv = document.createElement("div");
-        resultDiv.classList.add("result-item");
-        resultDiv.innerHTML = `
-          <h3><a href="${result.link}">${result.title}</a></h3>
-          <p>${result.snippet}</p>
-          <img src="${result.thumbnail}" alt="Thumbnail" width="50" />
-          <button onclick="addNoteToSelection(${index}, '${result.snippet}')">Add Note</button>
-        `;
-        resultsDiv.appendChild(resultDiv);
-      });
+      try {
+        // Call your Cloudflare Worker with the query
+        const response = await fetch(`https://bob.mylesjohn2012.workers.dev/search?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
 
-      // Load recent notes from local storage
-      const notes = JSON.parse(localStorage.getItem("notes") || "[]");
-      noteListDiv.innerHTML = "";
-      notes.slice(0, 3).forEach(note => {
-        const noteItem = document.createElement("div");
-        noteItem.classList.add("note-item");
-        noteItem.innerHTML = `
-          <strong>${note.title}</strong>
-          <p>${note.content}</p>
-        `;
-        noteListDiv.appendChild(noteItem);
-      });
-    }
+        if (data.length === 0) {
+          resultsDiv.innerHTML = '<p>No results found.</p>';
+          return;
+        }
 
-    // Function to add a note to local storage
-    function addNoteToSelection(index, content) {
-      const title = `Note ${index + 1}`;
-      const notes = JSON.parse(localStorage.getItem("notes") || "[]");
-      notes.push({ title, content });
-      localStorage.setItem("notes", JSON.stringify(notes));
+        // Clear any previous results
+        resultsDiv.innerHTML = '';
 
-      // Update the recent notes displayed
-      loadResults();
-    }
+        // Loop through the results and display them
+        data.forEach(item => {
+          const resultElement = document.createElement('div');
+          resultElement.classList.add('result');
 
-    // Function to open the add note dialog
-    function openNoteDialog() {
-      const noteContent = prompt("Select some text to save as a note:");
-      if (noteContent) {
-        addNoteToSelection(Date.now(), noteContent);
+          resultElement.innerHTML = `
+            <div class="result-thumbnail">
+              <img src="${item.thumbnail}" alt="${item.title}">
+            </div>
+            <div class="result-info">
+              <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+              <p>${item.snippet}</p>
+            </div>
+          `;
+
+          resultsDiv.appendChild(resultElement);
+        });
+      } catch (error) {
+        console.error('Error fetching search results:', error);
+        resultsDiv.innerHTML = '<p>Something went wrong. Please try again later.</p>';
       }
     }
 
-    // Load initial results (for example, searching for a query)
-    loadResults("search query");
+    // Get the search query from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const query = urlParams.get('q');
+
+    if (query) {
+      fetchSearchResults(query);
+    } else {
+      document.getElementById('results').innerHTML = '<p>Please enter a search query.</p>';
+    }
   </script>
+
 </body>
 </html>
