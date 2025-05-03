@@ -137,8 +137,10 @@
     const resultsDiv = document.getElementById('results');
     const summaryDiv = document.getElementById('summary');
     
-    // Search for results
+    // Ensure that the URL is properly encoded and valid
     const url = `https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`;
+
+    // Fetch search results
     try {
       const response = await fetch(url);
       const data = await response.json();
@@ -181,7 +183,6 @@
     }
   }
 
-  // Remove the auto-search on page load and just show the page with the search bar
 </script>
 </body>
 </html>
