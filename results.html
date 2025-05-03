@@ -114,50 +114,12 @@
     .summary-container div:hover {
       background-color: #f1f1f1;
     }
-
-    #frog {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      width: 80px;
-      height: 80px;
-      background-image: url('frog.png');
-      background-size: cover;
-      background-position: center;
-      border-radius: 50%;
-      animation: wildJump 5s ease-in-out forwards;
-      display: none;
-    }
-
-    @keyframes wildJump {
-      0% {
-        transform: translateX(-50%) translateY(0) rotate(0deg);
-      }
-      20% {
-        transform: translateX(-50%) translateY(-100px) rotate(45deg);
-      }
-      40% {
-        transform: translateX(150%) translateY(-150px) rotate(-45deg);
-      }
-      60% {
-        transform: translateX(-100%) translateY(-200px) rotate(90deg);
-      }
-      80% {
-        transform: translateX(80%) translateY(-100px) rotate(-90deg);
-      }
-      100% {
-        transform: translateX(-150%) translateY(-300px) rotate(360deg);
-        opacity: 0;
-      }
-    }
   </style>
 </head>
 <body>
-  <div id="frog"></div>
-  
   <div class="content" id="mainContent">
     <div class="search-container">
-      <input type="text" id="searchQuery" placeholder="Search...">
+      <input type="text" id="searchQuery" placeholder="Search..." value="frog">
       <button class="search-button" onclick="search()">Search</button>
     </div>
 
@@ -168,80 +130,58 @@
   </div>
 
 <script>
-  const frog = document.getElementById('frog');
-  
   async function search() {
     const query = document.getElementById('searchQuery').value.toLowerCase();
     const resultsDiv = document.getElementById('results');
     const summaryDiv = document.getElementById('summary');
     
-    if (query === 'frog') {
-      // Show frog and start jumping animation
-      frog.style.display = 'block';
+    const url = `https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      resultsDiv.innerHTML = '';
+      summaryDiv.innerHTML = '';
       
-      // Wait for frog to finish jumping out before showing frog-related results
-      setTimeout(async () => {
-        try {
-          const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/Frog`;
-          const response = await fetch(wikiApiUrl);
-          const data = await response.json();
-          
-          if (data && data.extract) {
-            resultsDiv.style.display = 'block';
-            resultsDiv.innerHTML = `<h3>Frog Facts:</h3><p>${data.extract}</p><a href="${data.content_urls.desktop.page}" target="_blank">Read more on Wikipedia</a>`;
-          } else {
-            resultsDiv.innerHTML = '<p>No frog-related information found.</p>';
-          }
-        } catch (error) {
-          console.error('Error fetching frog data:', error);
-          resultsDiv.innerHTML = '<p>Failed to fetch frog information.</p>';
-        }
-      }, 5000); // Adjust time to match frog animation duration
-    } else {
-      // Regular search behavior
-      const url = `https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`;
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
-        resultsDiv.innerHTML = '';
-        summaryDiv.innerHTML = '';
-        
-        if (data.items) {
-          resultsDiv.style.display = 'block';
-          data.items.forEach(item => {
-            const result = document.createElement('div');
-            result.innerHTML = `<h3><a href="${item.link}" target="_blank">${item.title}</a></h3><p>${item.snippet}</p>`;
-            resultsDiv.appendChild(result);
-          });
-        } else {
-          resultsDiv.innerHTML = '<p>No results found.</p>';
-          resultsDiv.style.display = 'block';
-        }
-
-        // Fetch Wikipedia summary for the right-side summary section
-        const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
-        try {
-          const wikiResponse = await fetch(wikiApiUrl);
-          const wikiData = await wikiResponse.json();
-          
-          if (wikiData && wikiData.extract) {
-            summaryDiv.style.display = 'block';
-            summaryDiv.innerHTML = `<h3>Wikipedia Summary:</h3><p>${wikiData.extract}</p><a href="${wikiData.content_urls.desktop.page}" target="_blank">Read more on Wikipedia</a>`;
-          } else {
-            summaryDiv.innerHTML = '<p>No Wikipedia summary found.</p>';
-          }
-        } catch (wikiError) {
-          console.error('Error fetching Wikipedia data:', wikiError);
-          summaryDiv.innerHTML = '<p>Failed to fetch Wikipedia summary.</p>';
-        }
-        
-      } catch (error) {
-        console.error('Search error:', error);
-        resultsDiv.innerHTML = '<p>Something went wrong.</p>';
+      if (data.items) {
+        resultsDiv.style.display = 'block';
+        data.items.forEach(item => {
+          const result = document.createElement('div');
+          result.innerHTML = `<h3><a href="${item.link}" target="_blank">${item.title}</a></h3><p>${item.snippet}</p>`;
+          resultsDiv.appendChild(result);
+        });
+      } else {
+        resultsDiv.innerHTML = '<p>No results found.</p>';
         resultsDiv.style.display = 'block';
       }
+
+      // Fetch Wikipedia summary for the right-side summary section
+      const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+      try {
+        const wikiResponse = await fetch(wikiApiUrl);
+        const wikiData = await wikiResponse.json();
+        
+        if (wikiData && wikiData.extract) {
+          summaryDiv.style.display = 'block';
+          summaryDiv.innerHTML = `<h3>Wikipedia Summary:</h3><p>${wikiData.extract}</p><a href="${wikiData.content_urls.desktop.page}" target="_blank">Read more on Wikipedia</a>`;
+        } else {
+          summaryDiv.innerHTML = '<p>No Wikipedia summary found.</p>';
+        }
+      } catch (wikiError) {
+        console.error('Error fetching Wikipedia data:', wikiError);
+        summaryDiv.innerHTML = '<p>Failed to fetch Wikipedia summary.</p>';
+      }
+      
+    } catch (error) {
+      console.error('Search error:', error);
+      resultsDiv.innerHTML = '<p>Something went wrong.</p>';
+      resultsDiv.style.display = 'block';
     }
   }
+
+  // Automatically trigger search when the page loads with default value
+  window.onload = function() {
+    search();
+  };
 </script>
 </body>
 </html>
