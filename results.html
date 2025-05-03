@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Search Engine</title>
+  <title>Search Results</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     * {
@@ -14,12 +14,11 @@
       font-family: 'Inter', sans-serif;
       background-color: #f9f9f9;
       margin: 0;
-      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
       flex-direction: column;
+      height: 100vh;
       overflow-y: scroll;
     }
 
@@ -30,34 +29,6 @@
       flex-direction: column;
       align-items: center;
       max-width: 1200px;
-    }
-
-    .search-container {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    input[type="text"] {
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      width: 300px;
-      font-size: 16px;
-    }
-
-    .search-button {
-      padding: 12px 20px;
-      background-color: #0073aa;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    .search-button:hover {
-      background-color: #005c8c;
     }
 
     .results-summary-container {
@@ -119,8 +90,7 @@
 <body>
   <div class="content" id="mainContent">
     <div class="search-container">
-      <input type="text" id="searchQuery" placeholder="Search...">
-      <button class="search-button" onclick="search()">Search</button>
+      <h1>Results for: <span id="searchTerm"></span></h1>
     </div>
 
     <div class="results-summary-container">
@@ -130,10 +100,15 @@
   </div>
 
 <script>
-  async function search() {
-    const query = document.getElementById('searchQuery').value.trim().toLowerCase();
-    if (!query) return;  // Prevent searching for empty queries
+  // Get the search query from the URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const query = urlParams.get('query');
+  
+  // Display the search term at the top
+  document.getElementById('searchTerm').textContent = query;
 
+  // Perform the search
+  async function search(query) {
     const resultsDiv = document.getElementById('results');
     const summaryDiv = document.getElementById('summary');
     
@@ -175,6 +150,9 @@
       resultsDiv.style.display = 'block';
     }
   }
+
+  // Run the search function
+  search(query);
 </script>
 </body>
 </html>
