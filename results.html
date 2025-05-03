@@ -14,18 +14,17 @@
       font-family: 'Inter', sans-serif;
       background-color: #f9f9f9;
       margin: 0;
+      padding: 0;
       display: flex;
-      height: 100vh;
       justify-content: center;
       align-items: center;
+      height: 100vh;
       flex-direction: column;
-      overflow: hidden;
     }
 
     .content {
-      flex: 1;
-      padding: 40px;
       width: 100%;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -41,8 +40,6 @@
       display: flex;
       gap: 10px;
       margin-bottom: 20px;
-      flex-wrap: wrap;
-      justify-content: center;
     }
 
     input[type="text"] {
@@ -65,6 +62,58 @@
 
     .search-button:hover {
       background-color: #005c8c;
+    }
+
+    .results-summary-container {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 1200px;
+      margin-top: 40px;
+    }
+
+    .results-container {
+      width: 48%;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .summary-container {
+      width: 48%;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .results-container h3 a,
+    .summary-container h3 a {
+      text-decoration: none;
+      color: #0073aa;
+      font-size: 18px;
+    }
+
+    .results-container p,
+    .summary-container p {
+      color: #333;
+      font-size: 14px;
+    }
+
+    .results-container div,
+    .summary-container div {
+      margin-bottom: 15px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .results-container div:hover,
+    .summary-container div:hover {
+      background-color: #f1f1f1;
     }
 
     #frog {
@@ -102,68 +151,6 @@
         opacity: 0;
       }
     }
-
-    .results-container {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      max-width: 1200px;
-    }
-
-    .results-column {
-      width: 48%;
-    }
-
-    #results {
-      background-color: #ffffff;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-
-    #results div {
-      margin-bottom: 15px;
-      padding: 15px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      background-color: #fff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-
-    #results h3 a {
-      text-decoration: none;
-      color: #0073aa;
-      font-size: 18px;
-    }
-
-    #results p {
-      color: #333;
-      font-size: 14px;
-    }
-
-    #results div:hover {
-      background-color: #f1f1f1;
-    }
-
-    #dictionaryResults {
-      background-color: #ffffff;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      display: none;
-    }
-
-    #dictionaryResults h3 a {
-      text-decoration: none;
-      color: #0073aa;
-      font-size: 18px;
-    }
-
-    #dictionaryResults p {
-      color: #333;
-      font-size: 14px;
-    }
-
   </style>
 </head>
 <body>
@@ -176,9 +163,9 @@
       <button class="search-button" onclick="search()">Search</button>
     </div>
 
-    <div class="results-container">
-      <div class="results-column" id="results"></div>
-      <div class="results-column" id="dictionaryResults"></div>
+    <div class="results-summary-container">
+      <div class="results-container" id="results"></div>
+      <div class="summary-container" id="summary"></div>
     </div>
   </div>
 
@@ -188,7 +175,7 @@
   async function search() {
     const query = document.getElementById('searchQuery').value.toLowerCase();
     const resultsDiv = document.getElementById('results');
-    const dictionaryResultsDiv = document.getElementById('dictionaryResults');
+    const summaryDiv = document.getElementById('summary');
     
     if (query === 'frog') {
       // Show frog and start jumping animation
@@ -219,7 +206,7 @@
         const response = await fetch(url);
         const data = await response.json();
         resultsDiv.innerHTML = '';
-        dictionaryResultsDiv.innerHTML = '';
+        summaryDiv.innerHTML = '';
         
         if (data.items) {
           resultsDiv.style.display = 'block';
@@ -233,21 +220,21 @@
           resultsDiv.style.display = 'block';
         }
 
-        // Fetch Wikipedia summary for dictionary section
+        // Fetch Wikipedia summary for the right-side summary section
         const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
         try {
           const wikiResponse = await fetch(wikiApiUrl);
           const wikiData = await wikiResponse.json();
           
           if (wikiData && wikiData.extract) {
-            dictionaryResultsDiv.style.display = 'block';
-            dictionaryResultsDiv.innerHTML = `<h3>Wikipedia Summary:</h3><p>${wikiData.extract}</p><a href="${wikiData.content_urls.desktop.page}" target="_blank">Read more on Wikipedia</a>`;
+            summaryDiv.style.display = 'block';
+            summaryDiv.innerHTML = `<h3>Wikipedia Summary:</h3><p>${wikiData.extract}</p><a href="${wikiData.content_urls.desktop.page}" target="_blank">Read more on Wikipedia</a>`;
           } else {
-            dictionaryResultsDiv.innerHTML = '<p>No Wikipedia summary found.</p>';
+            summaryDiv.innerHTML = '<p>No Wikipedia summary found.</p>';
           }
         } catch (wikiError) {
           console.error('Error fetching Wikipedia data:', wikiError);
-          dictionaryResultsDiv.innerHTML = '<p>Failed to fetch Wikipedia summary.</p>';
+          summaryDiv.innerHTML = '<p>Failed to fetch Wikipedia summary.</p>';
         }
         
       } catch (error) {
