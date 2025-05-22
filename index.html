@@ -3,180 +3,145 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MylesWeb</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <title>Bob Search</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f9f9f9;
       margin: 0;
-      display: flex;
-      height: 100vh;
-      justify-content: center;
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
-    .content {
-      flex: 1;
-      padding: 40px;
-      width: 100%;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(to right, #dff6ff, #e4f1fe);
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: start;
+      min-height: 100vh;
+      padding: 40px 20px;
     }
 
     h1 {
-      color: #0073aa;
-      font-size: 36px;
       margin-bottom: 20px;
+      color: #333;
+      text-shadow: 1px 1px 2px #aaa;
     }
 
-    .search-container {
+    .search-box {
       display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
       justify-content: center;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 30px;
     }
 
     input[type="text"] {
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      width: 300px;
-    }
-
-    .search-button {
-      padding: 12px 20px;
-      background-color: #0073aa;
-      color: white;
+      width: 100%;
+      padding: 12px 16px;
       border: none;
-      border-radius: 10px;
-      cursor: pointer;
+      border-radius: 10px 0 0 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       font-size: 16px;
     }
 
-    .search-button:hover {
-      background-color: #005c8c;
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 0 10px 10px 0;
+      background-color: #007acc;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
     }
 
-    .results-container {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      max-width: 1200px;
-    }
-
-    .results-column {
-      width: 48%;
-    }
-
-    .result {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      padding: 15px;
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-
-    .result-thumbnail img {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-
-    .result-info {
-      flex: 1;
-    }
-
-    .result-info h3 {
-      margin: 0;
-      font-size: 18px;
-      color: #0073aa;
-    }
-
-    .result-info p {
-      margin-top: 5px;
-      color: #333;
+    button:hover {
+      background-color: #005e99;
     }
 
     #results {
-      background-color: #ffffff;
+      width: 100%;
+      max-width: 800px;
+      background-color: white;
       border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
       padding: 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      overflow-y: auto;
+      max-height: 60vh;
+    }
+
+    .result-item {
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    .result-item h3 {
+      margin: 0;
+      font-size: 18px;
+      color: #007acc;
+    }
+
+    .result-item p {
+      margin: 5px 0 0;
+      font-size: 15px;
+      color: #333;
+    }
+
+    @media (max-width: 600px) {
+      input[type="text"] {
+        font-size: 14px;
+      }
+
+      button {
+        font-size: 14px;
+      }
+
+      .result-item h3 {
+        font-size: 16px;
+      }
     }
   </style>
 </head>
 <body>
-
-  <div class="content" id="mainContent">
-    <h1>MylesWeb</h1>
-    
-    <div class="search-container">
-      <input type="text" id="searchQuery" placeholder="Search...">
-      <button class="search-button" onclick="search()">Search</button>
-    </div>
-
-    <div class="results-container">
-      <div class="results-column" id="results"></div>
-    </div>
+  <h1>Bob Search</h1>
+  <div class="search-box">
+    <input type="text" id="searchQuery" placeholder="Type to search..." />
+    <button onclick="search()">Search</button>
   </div>
+
+  <div id="results"></div>
 
   <script>
     async function search() {
-      const query = document.getElementById('searchQuery').value.trim();
-      const resultsDiv = document.getElementById('results');
+      const query = document.getElementById("searchQuery").value.trim();
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
 
       if (!query) {
-        resultsDiv.innerHTML = '<p>Please enter a search query.</p>';
+        resultsDiv.innerHTML = "<p>Please enter a search query.</p>";
         return;
       }
 
+      const url = `https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`;
       try {
-        // Call your Cloudflare Worker with the query
-        const response = await fetch(`https://bob.mylesjohn2012.workers.dev/search?q=${encodeURIComponent(query)}`);
+        const response = await fetch(url);
         const data = await response.json();
 
-        if (data.length === 0) {
-          resultsDiv.innerHTML = '<p>No results found.</p>';
-          return;
-        }
-
-        // Clear any previous results
-        resultsDiv.innerHTML = '';
-
-        // Loop through the results and display them
-        data.forEach(item => {
-          const resultElement = document.createElement('div');
-          resultElement.classList.add('result');
-
-          resultElement.innerHTML = `
-            <div class="result-thumbnail">
-              <img src="${item.thumbnail}" alt="${item.title}">
-            </div>
-            <div class="result-info">
-              <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+        if (data.items && data.items.length > 0) {
+          data.items.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "result-item";
+            div.innerHTML = `
+              <h3><a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.title}</a></h3>
               <p>${item.snippet}</p>
-            </div>
-          `;
-
-          resultsDiv.appendChild(resultElement);
-        });
+            `;
+            resultsDiv.appendChild(div);
+          });
+        } else {
+          resultsDiv.innerHTML = "<p>No results found.</p>";
+        }
       } catch (error) {
-        console.error('Error fetching search results:', error);
-        resultsDiv.innerHTML = '<p>Something went wrong. Please try again later.</p>';
+        console.error("Search error:", error);
+        resultsDiv.innerHTML = "<p>Failed to load search results.</p>";
       }
     }
   </script>
-
 </body>
 </html>
