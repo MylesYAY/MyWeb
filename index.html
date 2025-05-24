@@ -3,267 +3,128 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>My Search Site</title>
+  <title>MyWeb</title>
+  <link rel="icon" href="favicon.png" />
   <style>
+    /* System font stack (San Francisco on Apple devices) */
+    body, input, button {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    }
+    :root {
+      --bg: #fafafa;
+      --text: #202124;
+      --accent: #1a73e8;  /* blue accent */
+      --radius: 9999px;
+    }
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f0f4f8;
-      color: #333;
-    }
-    /* Keep existing design style here */
-    header {
+      margin: 0;
+      height: 100vh;
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      margin-bottom: 20px;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
     }
-    #searchForm {
+    body.dark {
+      background: #202124;
+      color: #e8eaed;
+    }
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1.5rem;
+      color: var(--accent);
+      user-select: none;
+    }
+    form {
+      width: 90%;
+      max-width: 600px;
       display: flex;
-      gap: 5px;
-      margin-bottom: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: white;
+      transition: background 0.3s, color 0.3s;
     }
-    #searchInput {
-      flex-grow: 1;
-      padding: 8px;
-      font-size: 1rem;
+    body.dark form {
+      background: #303134;
+      box-shadow: none;
     }
-    #voiceBtn {
-      cursor: pointer;
+    input[type="text"] {
+      flex: 1;
+      border: none;
+      padding: 14px 20px;
       font-size: 1.2rem;
-      padding: 0 10px;
-      background: #ddd;
-      border: none;
-      border-radius: 4px;
+      outline: none;
+      background: transparent;
+      color: inherit;
     }
-    #searchForm button[type="submit"] {
-      padding: 8px 15px;
-      background-color: #0077cc;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
+    input[type="text"]::placeholder {
+      color: #aaa;
     }
-    #searchForm button[type="submit"]:hover {
-      background-color: #005fa3;
-    }
-
-    /* Personalized Dashboard */
-    #dashboard {
-      background: white;
-      padding: 15px;
-      border-radius: 6px;
-      margin-bottom: 30px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    #dashboard h2 {
-      margin-top: 0;
-    }
-
-    /* Mini Calculator */
-    #calculator {
-      width: 260px;
-      background: white;
-      padding: 15px;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      margin-bottom: 30px;
-    }
-    #calculator input {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      font-size: 1.1rem;
-      box-sizing: border-box;
-    }
-    #calculator button {
-      width: 60px;
-      padding: 8px;
-      margin: 3px;
-      font-size: 1.1rem;
-      cursor: pointer;
-    }
-    #calculator #calcResult {
-      margin-top: 10px;
-      font-weight: bold;
-      min-height: 24px;
-    }
-
-    /* Shop section */
-    #shop {
-      background: white;
-      padding: 15px;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    #shop button {
-      background: #28a745;
+    input[type="submit"] {
+      background: var(--accent);
       border: none;
       color: white;
-      padding: 10px 15px;
+      padding: 0 24px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    input[type="submit"]:hover {
+      background: #1558b0;
+    }
+    /* Dark mode toggle button on home page */
+    #darkToggle {
+      margin-top: 16px;
+      background: transparent;
+      border: 2px solid var(--accent);
+      border-radius: var(--radius);
+      color: var(--accent);
+      padding: 8px 16px;
       font-size: 1rem;
-      border-radius: 5px;
       cursor: pointer;
+      user-select: none;
+      transition: background 0.3s, color 0.3s, border-color 0.3s;
     }
-    #shop button:hover {
-      background: #218838;
+    #darkToggle:hover {
+      background: var(--accent);
+      color: white;
     }
-
+    body.dark #darkToggle {
+      border-color: #4d8ce8;
+      color: #4d8ce8;
+    }
+    body.dark #darkToggle:hover {
+      background: #4d8ce8;
+      color: #202124;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>My Search Site</h1>
-  </header>
-
-  <!-- Search Form with voice search -->
-  <form id="searchForm" action="results.html" method="GET">
-    <input type="text" id="searchInput" name="q" placeholder="Search..." autocomplete="off" required />
-    <button type="button" id="voiceBtn" title="Voice Search">🎤</button>
-    <button type="submit">Search</button>
+  <h1>MyWeb</h1>
+  <form action="results.html" method="GET">
+    <input type="text" name="q" placeholder="Search MyWeb…" required autofocus />
+    <input type="submit" value="Search" />
   </form>
-
-  <!-- Personalized Dashboard -->
-  <section id="dashboard">
-    <h2>Your Dashboard</h2>
-    <p>Welcome back, <span id="userName">Guest</span>!</p>
-    <p>Your recent searches:</p>
-    <ul id="recentSearches">
-      <!-- Recent searches will be added here -->
-    </ul>
-  </section>
-
-  <!-- Mini Calculator Widget -->
-  <section id="calculator">
-    <h2>Mini Calculator</h2>
-    <input type="text" id="calcInput" placeholder="Enter expression, e.g. 2+2" />
-    <div>
-      <button data-op="7">7</button>
-      <button data-op="8">8</button>
-      <button data-op="9">9</button>
-      <button data-op="/">÷</button>
-    </div>
-    <div>
-      <button data-op="4">4</button>
-      <button data-op="5">5</button>
-      <button data-op="6">6</button>
-      <button data-op="*">×</button>
-    </div>
-    <div>
-      <button data-op="1">1</button>
-      <button data-op="2">2</button>
-      <button data-op="3">3</button>
-      <button data-op="-">−</button>
-    </div>
-    <div>
-      <button data-op="0">0</button>
-      <button data-op=".">.</button>
-      <button id="calcClear">C</button>
-      <button data-op="+">+</button>
-    </div>
-    <button id="calcEvaluate" style="width: 100%; margin-top: 10px;">=</button>
-    <div id="calcResult"></div>
-  </section>
-
-  <!-- Shop Section with price display on buy button -->
-  <section id="shop">
-    <h2>Shop</h2>
-    <button id="buyItemBtn" data-price="50">Buy Pogo Stick - $50</button>
-  </section>
+  <button id="darkToggle" aria-label="Toggle dark mode">🌙</button>
 
   <script>
-    // Voice search
-    const voiceBtn = document.getElementById('voiceBtn');
-    const searchInput = document.getElementById('searchInput');
-
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'en-US';
-      recognition.interimResults = false;
-
-      voiceBtn.addEventListener('click', () => {
-        recognition.start();
-        voiceBtn.textContent = '🎙️...';
-      });
-
-      recognition.addEventListener('result', (event) => {
-        const transcript = event.results[0][0].transcript;
-        searchInput.value = transcript;
-        voiceBtn.textContent = '🎤';
-      });
-
-      recognition.addEventListener('end', () => {
-        voiceBtn.textContent = '🎤';
-      });
-    } else {
-      voiceBtn.style.display = 'none';
+    const darkToggle = document.getElementById('darkToggle');
+    const body = document.body;
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      body.classList.add('dark');
+      darkToggle.textContent = '☀️';
     }
-
-    // Personalized Dashboard - Simple recent searches using localStorage
-    const userNameSpan = document.getElementById('userName');
-    const recentSearchesUl = document.getElementById('recentSearches');
-    const RECENT_SEARCHES_KEY = 'recentSearches';
-
-    // Load recent searches from localStorage
-    function loadRecentSearches() {
-      const searches = JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY)) || [];
-      recentSearchesUl.innerHTML = '';
-      if (searches.length === 0) {
-        recentSearchesUl.innerHTML = '<li>No recent searches yet.</li>';
-        return;
-      }
-      searches.forEach(term => {
-        const li = document.createElement('li');
-        li.textContent = term;
-        recentSearchesUl.appendChild(li);
-      });
-    }
-    loadRecentSearches();
-
-    // Save search terms on form submit
-    document.getElementById('searchForm').addEventListener('submit', (e) => {
-      const term = searchInput.value.trim();
-      if (term) {
-        let searches = JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY)) || [];
-        // Add term to front, limit max 5
-        searches = [term, ...searches.filter(t => t !== term)].slice(0,5);
-        localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(searches));
-      }
+    darkToggle.addEventListener('click', () => {
+      body.classList.toggle('dark');
+      const on = body.classList.contains('dark');
+      localStorage.setItem('darkMode', on ? 'enabled' : 'disabled');
+      darkToggle.textContent = on ? '☀️' : '🌙';
     });
-
-    // Mini Calculator
-    const calcInput = document.getElementById('calcInput');
-    const calcResult = document.getElementById('calcResult');
-    const calcButtons = document.querySelectorAll('#calculator button[data-op]');
-    const calcClearBtn = document.getElementById('calcClear');
-    const calcEvaluateBtn = document.getElementById('calcEvaluate');
-
-    calcButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        calcInput.value += button.dataset.op;
-      });
-    });
-    calcClearBtn.addEventListener('click', () => {
-      calcInput.value = '';
-      calcResult.textContent = '';
-    });
-    calcEvaluateBtn.addEventListener('click', () => {
-      try {
-        // Evaluate safely
-        const val = eval(calcInput.value);
-        calcResult.textContent = `= ${val}`;
-      } catch {
-        calcResult.textContent = 'Invalid Expression';
-      }
-    });
-
-    // Shop buy button price display (could be dynamic, here static)
-    const buyBtn = document.getElementById('buyItemBtn');
-    buyBtn.addEventListener('click', () => {
-      alert(`You bought the Pogo Stick for $${buyBtn.dataset.price}!`);
-    });
-
   </script>
 </body>
 </html>
