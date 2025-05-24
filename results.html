@@ -212,4 +212,107 @@
   <header>
     <h1>MyWeb</h1>
     <form id="searchForm" action="results.html" method="GET">
-      <input type="text" name="q" id="searchInput" placeh
+      <input type="text" name="q" id="searchInput" placeholder="Search MyWeb…" value="" required />
+      <button type="submit">Search</button>
+    </form>
+    <button id="darkToggle">🌙</button>
+  </header>
+
+  <main>
+    <section id="results" role="region" aria-live="polite">
+      <!-- JS will inject results here -->
+    </section>
+    <aside id="dictionary">
+      <h2>Dictionary</h2>
+      <p>Type a word above and hit Search to see definitions.</p>
+    </aside>
+  </main>
+
+<script>
+  const params = new URLSearchParams(location.search);
+  const query = params.get('q') || '';
+  const searchInput = document.getElementById('searchInput');
+  searchInput.value = query;
+
+  const darkToggle = document.getElementById('darkToggle');
+  const body = document.body;
+  if (localStorage.getItem('darkMode') === 'enabled') {
+    body.classList.add('dark');
+    darkToggle.textContent = '☀️';
+  }
+  darkToggle.addEventListener('click', () => {
+    body.classList.toggle('dark');
+    const on = body.classList.contains('dark');
+    localStorage.setItem('darkMode', on ? 'enabled' : 'disabled');
+    darkToggle.textContent = on ? '☀️' : '🌙';
+  });
+
+  async function fetchResults(q) {
+    const resSection = document.getElementById('results');
+    resSection.innerHTML = '<p>Loading results...</p>';
+    try {
+      const resp = await fetch(`https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(q)}`);
+      const data = await resp.json();
+      if (!data.items || data.items.length === 0) {
+        resSection.innerHTML = `<p>No results found for "${q}".</p>`;
+      } else {
+        resSection.innerHTML = '';
+        data.items.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'result-item';
+          const thumb = item.pagemap?.cse_thumbnail?.[0]?.src || '';
+          const img = document.createElement('img');
+          img.className = 'result-thumb';
+          img.src = thumb;
+          const txt = document.createElement('div');
+          txt.className = 'result-text';
+          txt.innerHTML = `
+            <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+            <p>${item.snippet}</p>
+          `;
+          if (thumb) div.appendChild(img);
+          div.appendChild(txt);
+          resSection.appendChild(div);
+        });
+      }
+    } catch {
+      document.getElementById('results').innerHTML = '<p>Error loading results.</p>';
+    }
+  }
+
+  async function fetchDictionary(word) {
+    const dict = document.getElementById('dictionary');
+    if (!word) return;
+    dict.innerHTML = '<h2>Dictionary</h2><p>Loading definitions...</p>';
+    try {
+      const r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+      const j = await r.json();
+      if (Array.isArray(j) && j.length) {
+        let html = '<h2>Dictionary</h2>';
+        j[0].meanings.forEach(m => {
+          html += `<strong>${m.partOfSpeech}</strong><ul>`;
+          m.definitions.forEach(d => {
+            html += `<li>${d.definition}${d.example?`<br><em>“${d.example}”</em>`:''}</li>`;
+          });
+          html += '</ul>';
+        });
+        dict.innerHTML = html;
+      } else {
+        dict.innerHTML = `<h2>Dictionary</h2><p>No definitions found.</p>`;
+      }
+    } catch {
+      dict.innerHTML = `<h2>Dictionary</h2><p>Error fetching definitions.</p>`;
+    }
+  }
+
+  document.getElementById('searchForm').addEventListener('submit', e => {
+    // allow normal navigation to include ?q=...
+  });
+
+  if (query) {
+    fetchResults(query);
+    fetchDictionary(query.split(' ')[0]);
+  }
+</script>
+</body>
+</html>
