@@ -3,426 +3,132 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Results – MyWeb</title>
-  <link rel="icon" href="favicon.png" />
+  <title>Search Results</title>
   <style>
-    body, input, button {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-    }
-    :root {
-      --bg-light: #fafafa;
-      --bg-dark: #202124;
-      --text-light: #202124;
-      --text-dark: #e8eaed;
-      --accent: #1a73e8;  /* blue accent */
-      --radius: 12px;
-      --transition: 0.3s;
-    }
     body {
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      background: var(--bg-light);
-      color: var(--text-light);
-      transition: background var(--transition), color var(--transition);
-      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f0f4f8;
+      color: #333;
     }
-    body.dark {
-      background: var(--bg-dark);
-      color: var(--text-dark);
+    h1 {
+      margin-bottom: 20px;
     }
-    header {
-      display: flex;
-      align-items: center;
-      padding: 12px 24px;
-      background: var(--bg-light);
-      border-bottom: 1px solid #ddd;
-      transition: background var(--transition);
-    }
-    body.dark header {
-      background: #303134;
-      border-color: #444;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 1.5rem;
-      color: var(--accent);
-      user-select: none;
-    }
-    /* search in header */
-    form#searchForm {
-      flex: 1;
-      margin-left: 24px;
-      display: flex;
-      gap: 8px;
-    }
-    form#searchForm input[type="text"] {
-      flex: 1;
-      padding: 8px 12px;
-      font-size: 1rem;
-      border: 2px solid var(--accent);
-      border-radius: var(--radius);
-      outline: none;
-      transition: border var(--transition);
-      background: white;
-      color: var(--text-light);
-    }
-    body.dark form#searchForm input[type="text"] {
-      border-color: #4d8ce8;
-      background: #424242;
-      color: var(--text-dark);
-    }
-    form#searchForm button {
-      background: var(--accent);
-      border: none;
-      color: white;
-      padding: 8px 16px;
-      font-weight: 600;
-      border-radius: var(--radius);
-      cursor: pointer;
-      transition: background var(--transition);
-    }
-    form#searchForm button:hover {
-      background: #125ac8;
-    }
-    /* dark mode toggle */
-    #darkToggle {
-      background: transparent;
-      border: 2px solid var(--accent);
-      border-radius: var(--radius);
-      color: var(--accent);
-      padding: 6px 12px;
-      margin-left: 16px;
-      cursor: pointer;
-      transition: background var(--transition), color var(--transition);
-    }
-    #darkToggle:hover {
-      background: var(--accent);
-      color: white;
-    }
-    body.dark #darkToggle {
-      border-color: #4d8ce8;
-      color: #4d8ce8;
-    }
-    body.dark #darkToggle:hover {
-      background: #4d8ce8;
-      color: var(--text-dark);
-    }
-
-    main {
-      display: flex;
-      flex: 1;
-      max-width: 1200px;
-      margin: 20px auto;
-      padding: 0 24px;
-      gap: 20px;
-    }
-    /* results list */
     #results {
-      flex: 3;
-      overflow-y: auto;
-      max-height: 70vh;
+      list-style: none;
+      padding: 0;
     }
-    .result-item {
-      display: flex;
-      gap: 12px;
-      padding: 12px 0;
-      border-bottom: 1px solid #ddd;
-      transition: background var(--transition);
+    #results li {
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #ccc;
     }
-    .result-item:hover {
-      background: #f0f0f0;
-    }
-    body.dark .result-item:hover {
-      background: #3c4043;
-    }
-    .result-thumb {
-      width: 120px;
-      height: 80px;
-      object-fit: cover;
-      border-radius: var(--radius);
-      background: #eee;
-      flex-shrink: 0;
-    }
-    body.dark .result-thumb {
-      background: #444;
-    }
-    .result-text {
-      flex: 1;
-    }
-    .result-text h3 {
-      margin: 0 0 6px;
-      font-size: 1.1rem;
-      font-weight: 600;
-    }
-    .result-text h3 a {
-      text-decoration: none;
-      color: #1a0dab;
-    }
-    body.dark .result-text h3 a {
-      color: #8ab4f8;
-    }
-    .result-text p {
-      margin: 0;
-      font-size: 0.9rem;
-      color: #4d5156;
-    }
-    body.dark .result-text p {
-      color: #cfcfcf;
-    }
-
-    /* dictionary sidebar */
-    #dictionary {
-      flex: 1;
-      border-left: 1px solid #ddd;
-      padding-left: 16px;
-      max-height: 70vh;
-      overflow-y: auto;
-      font-size: 0.9rem;
-    }
-    body.dark #dictionary {
-      border-color: #444;
-    }
-    #dictionary h2 {
-      margin-top: 0;
-      color: var(--accent);
-      font-weight: 600;
-    }
-    /* pagination */
     #pagination {
-      margin-top: 16px;
+      margin-top: 30px;
       display: flex;
       justify-content: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      user-select: none;
+      gap: 10px;
     }
     #pagination button {
-      background: transparent;
-      border: 2px solid var(--accent);
-      color: var(--accent);
-      border-radius: var(--radius);
-      padding: 6px 14px;
-      font-weight: 600;
+      padding: 8px 12px;
       cursor: pointer;
-      transition: background 0.3s, color 0.3s;
-      min-width: 36px;
-    }
-    #pagination button:hover:not(:disabled) {
-      background: var(--accent);
+      background-color: #0077cc;
+      border: none;
       color: white;
+      border-radius: 4px;
     }
     #pagination button:disabled {
-      border-color: #ccc;
-      color: #ccc;
-      cursor: default;
-      background: transparent;
-    }
-    body.dark #pagination button {
-      border-color: #4d8ce8;
-      color: #4d8ce8;
-    }
-    body.dark #pagination button:hover:not(:disabled) {
-      background: #4d8ce8;
-      color: var(--text-dark);
-    }
-    body.dark #pagination button:disabled {
-      border-color: #666;
-      color: #666;
+      background-color: #999;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>MyWeb</h1>
-    <form id="searchForm" action="results.html" method="GET" role="search" aria-label="Search form">
-      <input type="text" name="q" id="searchInput" placeholder="Search MyWeb…" required autofocus />
-      <button type="submit">Search</button>
-    </form>
-    <button id="darkToggle" aria-label="Toggle dark mode">🌙</button>
-  </header>
-  <main>
-    <section id="results" aria-live="polite" aria-relevant="additions" aria-atomic="true">
-      <p>Loading results...</p>
-    </section>
-    <aside id="dictionary" aria-label="Dictionary definitions">
-      <p>Loading definitions...</p>
-    </aside>
-  </main>
-  <div id="pagination" role="navigation" aria-label="Search result pagination"></div>
+  <h1>Search Results</h1>
+  <ul id="results">Loading...</ul>
+  <div id="pagination">
+    <button id="prevBtn" disabled>Previous</button>
+    <button id="nextBtn" disabled>Next</button>
+  </div>
 
   <script>
-    // Dark mode toggle
-    const darkToggle = document.getElementById('darkToggle');
-    const body = document.body;
-    if (localStorage.getItem('darkMode') === 'enabled') {
-      body.classList.add('dark');
-      darkToggle.textContent = '☀️';
-    }
-    darkToggle.addEventListener('click', () => {
-      body.classList.toggle('dark');
-      const on = body.classList.contains('dark');
-      localStorage.setItem('darkMode', on ? 'enabled' : 'disabled');
-      darkToggle.textContent = on ? '☀️' : '🌙';
-    });
+    const resultsUl = document.getElementById('results');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
 
-    // Grab elements
-    const resultsEl = document.getElementById('results');
-    const dictEl = document.getElementById('dictionary');
-    const paginationEl = document.getElementById('pagination');
-    const searchInput = document.getElementById('searchInput');
+    // Read search query and page start index from URL params
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get('q');
+    let start = parseInt(params.get('start')) || 1;
 
-    // Get query from URL param
-    const urlParams = new URLSearchParams(window.location.search);
-    const query = urlParams.get('q') || '';
-    searchInput.value = query;
-
-    // Pagination variables
-    const pageSize = 10; // results per page
-    let currentPage = 1;
-    let allResults = [];
-
-    // Function to render results for current page
-    function renderPage(page) {
-      currentPage = page;
-      const startIdx = (page - 1) * pageSize;
-      const pageResults = allResults.slice(startIdx, startIdx + pageSize);
-
-      if (pageResults.length === 0) {
-        resultsEl.innerHTML = `<p>No results found for "<strong>${query}</strong>".</p>`;
-        paginationEl.innerHTML = '';
-        return;
-      }
-
-      resultsEl.innerHTML = pageResults
-        .map(res => `
-          <article class="result-item">
-            ${res.image ? `<img loading="lazy" class="result-thumb" src="${res.image}" alt="Image for ${res.title}"/>` : ''}
-            <div class="result-text">
-              <h3><a href="${res.url}" target="_blank" rel="noopener noreferrer">${res.title}</a></h3>
-              <p>${res.description || ''}</p>
-            </div>
-          </article>
-        `).join('');
-
-      renderPagination();
+    if (!query) {
+      resultsUl.innerHTML = '<li>Please provide a search query.</li>';
     }
 
-    // Function to render pagination buttons
-    function renderPagination() {
-      const totalPages = Math.ceil(allResults.length / pageSize);
-      if (totalPages <= 1) {
-        paginationEl.innerHTML = '';
-        return;
-      }
-      let buttonsHtml = '';
+    const API_URL = 'YOUR_WORKER_ENDPOINT_URL'; // Replace with your Cloudflare Worker URL
 
-      // Previous button
-      buttonsHtml += `<button ${currentPage === 1 ? 'disabled' : ''} aria-label="Previous page">&lt;</button>`;
-
-      // Show up to 5 page buttons around current page
-      const maxPagesToShow = 5;
-      let startPage = Math.max(1, currentPage - 2);
-      let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-
-      if (endPage - startPage < maxPagesToShow -1) {
-        startPage = Math.max(1, endPage - maxPagesToShow + 1);
-      }
-
-      for (let i = startPage; i <= endPage; i++) {
-        buttonsHtml += `<button ${i === currentPage ? 'disabled aria-current="page"' : ''}>${i}</button>`;
-      }
-
-      // Next button
-      buttonsHtml += `<button ${currentPage === totalPages ? 'disabled' : ''} aria-label="Next page">&gt;</button>`;
-
-      paginationEl.innerHTML = buttonsHtml;
-
-      // Add event listeners
-      const btns = paginationEl.querySelectorAll('button');
-      btns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          if (btn.disabled) return;
-          if (btn.textContent === '<') {
-            renderPage(currentPage - 1);
-          } else if (btn.textContent === '>') {
-            renderPage(currentPage + 1);
-          } else {
-            renderPage(Number(btn.textContent));
-          }
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-      });
-    }
-
-    // Fetch search results
-    async function fetchResults() {
-      if (!query.trim()) {
-        resultsEl.innerHTML = `<p>Please enter a search query.</p>`;
-        dictEl.innerHTML = '';
-        paginationEl.innerHTML = '';
-        return;
-      }
-
-      resultsEl.innerHTML = `<p>Loading results...</p>`;
-      dictEl.innerHTML = `<p>Loading definitions...</p>`;
-      paginationEl.innerHTML = '';
+    async function fetchResults(q, startIndex) {
+      // Your backend worker supports `start` param for pagination
+      const url = `${API_URL}?q=${encodeURIComponent(q)}&start=${startIndex}`;
+      resultsUl.innerHTML = 'Loading...';
 
       try {
-        const res = await fetch(`https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`);
-        if (!res.ok) throw new Error('Failed to fetch results');
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Failed to fetch');
+
         const data = await res.json();
 
-        allResults = data.results || [];
-        renderPage(1);
-      } catch (e) {
-        resultsEl.innerHTML = `<p>Error loading results: ${e.message}</p>`;
-        paginationEl.innerHTML = '';
-      }
-    }
-
-    // Fetch dictionary data
-    async function fetchDictionary() {
-      if (!query.trim()) {
-        dictEl.innerHTML = '';
-        return;
-      }
-      try {
-        const dictRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(query)}`);
-        if (!dictRes.ok) {
-          dictEl.innerHTML = `<p>No dictionary definitions found.</p>`;
+        if (!data.items || data.items.length === 0) {
+          resultsUl.innerHTML = '<li>No results found.</li>';
+          prevBtn.disabled = startIndex <= 1;
+          nextBtn.disabled = true;
           return;
         }
-        const dictData = await dictRes.json();
-        // Display first meaning of first entry
-        const firstEntry = dictData[0];
-        const meanings = firstEntry.meanings || [];
-        let html = `<h2>Definition: ${firstEntry.word}</h2>`;
-        meanings.forEach(meaning => {
-          html += `<h3>${meaning.partOfSpeech}</h3>`;
-          meaning.definitions.forEach((def, i) => {
-            html += `<p>${i + 1}. ${def.definition}</p>`;
-            if (def.example) {
-              html += `<blockquote>Example: ${def.example}</blockquote>`;
-            }
-          });
+
+        resultsUl.innerHTML = '';
+        data.items.forEach(item => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <a href="${item.link}" target="_blank" rel="noopener noreferrer"><strong>${item.title}</strong></a><br/>
+            <small>${item.displayLink}</small><br/>
+            <p>${item.snippet}</p>
+          `;
+          resultsUl.appendChild(li);
         });
-        dictEl.innerHTML = html;
-      } catch {
-        dictEl.innerHTML = `<p>No dictionary definitions found.</p>`;
+
+        // Pagination logic
+        prevBtn.disabled = startIndex <= 1;
+        // Google API returns totalResults in data.searchInformation
+        const totalResults = parseInt(data.searchInformation?.totalResults) || 0;
+        const resultsPerPage = 10; // Google default is 10
+        nextBtn.disabled = startIndex + resultsPerPage > totalResults;
+
+      } catch (e) {
+        resultsUl.innerHTML = '<li>Error loading results. Try again.</li>';
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
       }
     }
 
-    fetchResults();
-    fetchDictionary();
-
-    // Resubmit search if user changes query in search bar
-    document.getElementById('searchForm').addEventListener('submit', e => {
-      if (!searchInput.value.trim()) {
-        e.preventDefault();
+    prevBtn.addEventListener('click', () => {
+      if (start > 1) {
+        start -= 10;
+        updateUrlAndFetch();
       }
     });
+    nextBtn.addEventListener('click', () => {
+      start += 10;
+      updateUrlAndFetch();
+    });
+
+    function updateUrlAndFetch() {
+      const newUrl = new URL(window.location);
+      newUrl.searchParams.set('start', start);
+      window.history.pushState({}, '', newUrl);
+      fetchResults(query, start);
+    }
+
+    fetchResults(query, start);
   </script>
 </body>
 </html>
