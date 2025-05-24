@@ -65,6 +65,8 @@
       border-radius: var(--radius);
       outline: none;
       transition: border var(--transition);
+      background: white;
+      color: var(--text-light);
     }
     body.dark form#searchForm input[type="text"] {
       border-color: #4d8ce8;
@@ -120,7 +122,7 @@
     #results {
       flex: 3;
       overflow-y: auto;
-      max-height: 80vh;
+      max-height: 70vh;
     }
     .result-item {
       display: flex;
@@ -173,146 +175,254 @@
     /* dictionary sidebar */
     #dictionary {
       flex: 1;
-      background: white;
-      border-radius: var(--radius);
-      padding: 12px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      max-height: 80vh;
+      border-left: 1px solid #ddd;
+      padding-left: 16px;
+      max-height: 70vh;
       overflow-y: auto;
       font-size: 0.9rem;
-      transition: background var(--transition), color var(--transition);
     }
     body.dark #dictionary {
-      background: #303134;
-      color: var(--text-dark);
-      box-shadow: none;
+      border-color: #444;
     }
     #dictionary h2 {
-      margin: 0 0 12px;
-      font-size: 1.2rem;
-      border-bottom: 2px solid var(--accent);
-      padding-bottom: 4px;
+      margin-top: 0;
       color: var(--accent);
+      font-weight: 600;
     }
-    #dictionary ul {
-      padding-left: 20px;
+    /* pagination */
+    #pagination {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      user-select: none;
     }
-    #dictionary li {
-      margin-bottom: 8px;
+    #pagination button {
+      background: transparent;
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      border-radius: var(--radius);
+      padding: 6px 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+      min-width: 36px;
     }
-
-    @media (max-width: 800px) {
-      main { flex-direction: column; }
-      #dictionary { order: 2; max-height: none; }
-      #results   { order: 1; max-height: none; }
+    #pagination button:hover:not(:disabled) {
+      background: var(--accent);
+      color: white;
+    }
+    #pagination button:disabled {
+      border-color: #ccc;
+      color: #ccc;
+      cursor: default;
+      background: transparent;
+    }
+    body.dark #pagination button {
+      border-color: #4d8ce8;
+      color: #4d8ce8;
+    }
+    body.dark #pagination button:hover:not(:disabled) {
+      background: #4d8ce8;
+      color: var(--text-dark);
+    }
+    body.dark #pagination button:disabled {
+      border-color: #666;
+      color: #666;
     }
   </style>
 </head>
 <body>
   <header>
     <h1>MyWeb</h1>
-    <form id="searchForm" action="results.html" method="GET">
-      <input type="text" name="q" id="searchInput" placeholder="Search MyWeb…" value="" required />
+    <form id="searchForm" action="results.html" method="GET" role="search" aria-label="Search form">
+      <input type="text" name="q" id="searchInput" placeholder="Search MyWeb…" required autofocus />
       <button type="submit">Search</button>
     </form>
-    <button id="darkToggle">🌙</button>
+    <button id="darkToggle" aria-label="Toggle dark mode">🌙</button>
   </header>
-
   <main>
-    <section id="results" role="region" aria-live="polite">
-      <!-- JS will inject results here -->
+    <section id="results" aria-live="polite" aria-relevant="additions" aria-atomic="true">
+      <p>Loading results...</p>
     </section>
-    <aside id="dictionary">
-      <h2>Dictionary</h2>
-      <p>Type a word above and hit Search to see definitions.</p>
+    <aside id="dictionary" aria-label="Dictionary definitions">
+      <p>Loading definitions...</p>
     </aside>
   </main>
+  <div id="pagination" role="navigation" aria-label="Search result pagination"></div>
 
-<script>
-  const params = new URLSearchParams(location.search);
-  const query = params.get('q') || '';
-  const searchInput = document.getElementById('searchInput');
-  searchInput.value = query;
-
-  const darkToggle = document.getElementById('darkToggle');
-  const body = document.body;
-  if (localStorage.getItem('darkMode') === 'enabled') {
-    body.classList.add('dark');
-    darkToggle.textContent = '☀️';
-  }
-  darkToggle.addEventListener('click', () => {
-    body.classList.toggle('dark');
-    const on = body.classList.contains('dark');
-    localStorage.setItem('darkMode', on ? 'enabled' : 'disabled');
-    darkToggle.textContent = on ? '☀️' : '🌙';
-  });
-
-  async function fetchResults(q) {
-    const resSection = document.getElementById('results');
-    resSection.innerHTML = '<p>Loading results...</p>';
-    try {
-      const resp = await fetch(`https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(q)}`);
-      const data = await resp.json();
-      if (!data.items || data.items.length === 0) {
-        resSection.innerHTML = `<p>No results found for "${q}".</p>`;
-      } else {
-        resSection.innerHTML = '';
-        data.items.forEach(item => {
-          const div = document.createElement('div');
-          div.className = 'result-item';
-          const thumb = item.pagemap?.cse_thumbnail?.[0]?.src || '';
-          const img = document.createElement('img');
-          img.className = 'result-thumb';
-          img.src = thumb;
-          const txt = document.createElement('div');
-          txt.className = 'result-text';
-          txt.innerHTML = `
-            <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
-            <p>${item.snippet}</p>
-          `;
-          if (thumb) div.appendChild(img);
-          div.appendChild(txt);
-          resSection.appendChild(div);
-        });
-      }
-    } catch {
-      document.getElementById('results').innerHTML = '<p>Error loading results.</p>';
+  <script>
+    // Dark mode toggle
+    const darkToggle = document.getElementById('darkToggle');
+    const body = document.body;
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      body.classList.add('dark');
+      darkToggle.textContent = '☀️';
     }
-  }
+    darkToggle.addEventListener('click', () => {
+      body.classList.toggle('dark');
+      const on = body.classList.contains('dark');
+      localStorage.setItem('darkMode', on ? 'enabled' : 'disabled');
+      darkToggle.textContent = on ? '☀️' : '🌙';
+    });
 
-  async function fetchDictionary(word) {
-    const dict = document.getElementById('dictionary');
-    if (!word) return;
-    dict.innerHTML = '<h2>Dictionary</h2><p>Loading definitions...</p>';
-    try {
-      const r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
-      const j = await r.json();
-      if (Array.isArray(j) && j.length) {
-        let html = '<h2>Dictionary</h2>';
-        j[0].meanings.forEach(m => {
-          html += `<strong>${m.partOfSpeech}</strong><ul>`;
-          m.definitions.forEach(d => {
-            html += `<li>${d.definition}${d.example?`<br><em>“${d.example}”</em>`:''}</li>`;
+    // Grab elements
+    const resultsEl = document.getElementById('results');
+    const dictEl = document.getElementById('dictionary');
+    const paginationEl = document.getElementById('pagination');
+    const searchInput = document.getElementById('searchInput');
+
+    // Get query from URL param
+    const urlParams = new URLSearchParams(window.location.search);
+    const query = urlParams.get('q') || '';
+    searchInput.value = query;
+
+    // Pagination variables
+    const pageSize = 10; // results per page
+    let currentPage = 1;
+    let allResults = [];
+
+    // Function to render results for current page
+    function renderPage(page) {
+      currentPage = page;
+      const startIdx = (page - 1) * pageSize;
+      const pageResults = allResults.slice(startIdx, startIdx + pageSize);
+
+      if (pageResults.length === 0) {
+        resultsEl.innerHTML = `<p>No results found for "<strong>${query}</strong>".</p>`;
+        paginationEl.innerHTML = '';
+        return;
+      }
+
+      resultsEl.innerHTML = pageResults
+        .map(res => `
+          <article class="result-item">
+            ${res.image ? `<img loading="lazy" class="result-thumb" src="${res.image}" alt="Image for ${res.title}"/>` : ''}
+            <div class="result-text">
+              <h3><a href="${res.url}" target="_blank" rel="noopener noreferrer">${res.title}</a></h3>
+              <p>${res.description || ''}</p>
+            </div>
+          </article>
+        `).join('');
+
+      renderPagination();
+    }
+
+    // Function to render pagination buttons
+    function renderPagination() {
+      const totalPages = Math.ceil(allResults.length / pageSize);
+      if (totalPages <= 1) {
+        paginationEl.innerHTML = '';
+        return;
+      }
+      let buttonsHtml = '';
+
+      // Previous button
+      buttonsHtml += `<button ${currentPage === 1 ? 'disabled' : ''} aria-label="Previous page">&lt;</button>`;
+
+      // Show up to 5 page buttons around current page
+      const maxPagesToShow = 5;
+      let startPage = Math.max(1, currentPage - 2);
+      let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+      if (endPage - startPage < maxPagesToShow -1) {
+        startPage = Math.max(1, endPage - maxPagesToShow + 1);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        buttonsHtml += `<button ${i === currentPage ? 'disabled aria-current="page"' : ''}>${i}</button>`;
+      }
+
+      // Next button
+      buttonsHtml += `<button ${currentPage === totalPages ? 'disabled' : ''} aria-label="Next page">&gt;</button>`;
+
+      paginationEl.innerHTML = buttonsHtml;
+
+      // Add event listeners
+      const btns = paginationEl.querySelectorAll('button');
+      btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.disabled) return;
+          if (btn.textContent === '<') {
+            renderPage(currentPage - 1);
+          } else if (btn.textContent === '>') {
+            renderPage(currentPage + 1);
+          } else {
+            renderPage(Number(btn.textContent));
+          }
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+    }
+
+    // Fetch search results
+    async function fetchResults() {
+      if (!query.trim()) {
+        resultsEl.innerHTML = `<p>Please enter a search query.</p>`;
+        dictEl.innerHTML = '';
+        paginationEl.innerHTML = '';
+        return;
+      }
+
+      resultsEl.innerHTML = `<p>Loading results...</p>`;
+      dictEl.innerHTML = `<p>Loading definitions...</p>`;
+      paginationEl.innerHTML = '';
+
+      try {
+        const res = await fetch(`https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`);
+        if (!res.ok) throw new Error('Failed to fetch results');
+        const data = await res.json();
+
+        allResults = data.results || [];
+        renderPage(1);
+      } catch (e) {
+        resultsEl.innerHTML = `<p>Error loading results: ${e.message}</p>`;
+        paginationEl.innerHTML = '';
+      }
+    }
+
+    // Fetch dictionary data
+    async function fetchDictionary() {
+      if (!query.trim()) {
+        dictEl.innerHTML = '';
+        return;
+      }
+      try {
+        const dictRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(query)}`);
+        if (!dictRes.ok) {
+          dictEl.innerHTML = `<p>No dictionary definitions found.</p>`;
+          return;
+        }
+        const dictData = await dictRes.json();
+        // Display first meaning of first entry
+        const firstEntry = dictData[0];
+        const meanings = firstEntry.meanings || [];
+        let html = `<h2>Definition: ${firstEntry.word}</h2>`;
+        meanings.forEach(meaning => {
+          html += `<h3>${meaning.partOfSpeech}</h3>`;
+          meaning.definitions.forEach((def, i) => {
+            html += `<p>${i + 1}. ${def.definition}</p>`;
+            if (def.example) {
+              html += `<blockquote>Example: ${def.example}</blockquote>`;
+            }
           });
-          html += '</ul>';
         });
-        dict.innerHTML = html;
-      } else {
-        dict.innerHTML = `<h2>Dictionary</h2><p>No definitions found.</p>`;
+        dictEl.innerHTML = html;
+      } catch {
+        dictEl.innerHTML = `<p>No dictionary definitions found.</p>`;
       }
-    } catch {
-      dict.innerHTML = `<h2>Dictionary</h2><p>Error fetching definitions.</p>`;
     }
-  }
 
-  document.getElementById('searchForm').addEventListener('submit', e => {
-    // allow normal navigation to include ?q=...
-  });
+    fetchResults();
+    fetchDictionary();
 
-  if (query) {
-    fetchResults(query);
-    fetchDictionary(query.split(' ')[0]);
-  }
-</script>
+    // Resubmit search if user changes query in search bar
+    document.getElementById('searchForm').addEventListener('submit', e => {
+      if (!searchInput.value.trim()) {
+        e.preventDefault();
+      }
+    });
+  </script>
 </body>
 </html>
