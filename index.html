@@ -26,6 +26,11 @@
       align-items: center;
       background: var(--bg);
       color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark {
+      background: #202124;
+      color: #e8eaed;
     }
     h1 {
       font-size: 3rem;
@@ -41,6 +46,11 @@
       border-radius: var(--radius);
       overflow: hidden;
       background: white;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark form {
+      background: #303134;
+      box-shadow: none;
     }
     input[type="text"] {
       flex: 1;
@@ -48,6 +58,8 @@
       padding: 14px 20px;
       font-size: 1.2rem;
       outline: none;
+      background: transparent;
+      color: inherit;
     }
     input[type="text"]::placeholder {
       color: #aaa;
@@ -65,6 +77,31 @@
     input[type="submit"]:hover {
       background: #1558b0;
     }
+    /* Dark mode toggle button on home page */
+    #darkToggle {
+      margin-top: 16px;
+      background: transparent;
+      border: 2px solid var(--accent);
+      border-radius: var(--radius);
+      color: var(--accent);
+      padding: 8px 16px;
+      font-size: 1rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.3s, color 0.3s, border-color 0.3s;
+    }
+    #darkToggle:hover {
+      background: var(--accent);
+      color: white;
+    }
+    body.dark #darkToggle {
+      border-color: #4d8ce8;
+      color: #4d8ce8;
+    }
+    body.dark #darkToggle:hover {
+      background: #4d8ce8;
+      color: #202124;
+    }
   </style>
 </head>
 <body>
@@ -73,5 +110,21 @@
     <input type="text" name="q" placeholder="Search MyWeb…" required autofocus />
     <input type="submit" value="Search" />
   </form>
+  <button id="darkToggle" aria-label="Toggle dark mode">🌙</button>
+
+  <script>
+    const darkToggle = document.getElementById('darkToggle');
+    const body = document.body;
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      body.classList.add('dark');
+      darkToggle.textContent = '☀️';
+    }
+    darkToggle.addEventListener('click', () => {
+      body.classList.toggle('dark');
+      const on = body.classList.contains('dark');
+      localStorage.setItem('darkMode', on ? 'enabled' : 'disabled');
+      darkToggle.textContent = on ? '☀️' : '🌙';
+    });
+  </script>
 </body>
 </html>
