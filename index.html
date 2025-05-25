@@ -2,150 +2,43 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MyWeb</title>
-  <link rel="icon" href="favicon.png" type="image/png" />
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      overflow-x: hidden;
-      overflow-y: auto;
-    }
-    body, input, button {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      background: #fafafa;
-      color: #202124;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    h1 {
-      font-size: 3rem;
-      color: #1a73e8;
-      margin-bottom: 1.5rem;
-    }
-    form {
-      display: flex;
-      width: 90%;
-      max-width: 600px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      border-radius: 9999px;
-      overflow: hidden;
-      background: white;
-    }
-    input[type="text"] {
-      flex: 1;
-      padding: 14px 20px;
-      border: none;
-      font-size: 1.2rem;
-    }
-    input[type="submit"] {
-      flex: none;
-      height: auto;
-      background: #1a73e8;
-      color: white;
-      border: none;
-      padding: 14px 24px;
-      font-weight: 600;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    input[type="submit"]:hover {
-      background: #1558b0;
-    }
-    .auth-buttons {
-      margin-top: 1rem;
-      display: flex;
-      gap: 1rem;
-    }
-    .auth-buttons button {
-      flex: none;
-      padding: 0.5rem 1rem;
-      border: 1px solid #1a73e8;
-      background: white;
-      color: #1a73e8;
-      border-radius: 9999px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .auth-buttons button:hover {
-      background: #e8f0fe;
-    }
-    #authModal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.5);
-      align-items: center;
-      justify-content: center;
-    }
-    #authModal .modal-content {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 320px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    #authModal input, #authModal button {
-      padding: 0.5rem;
-      font-size: 1rem;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Custom Search Home</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>MyWeb</h1>
-  <form id="searchForm" action="results.html" method="GET">
-    <input type="text" name="q" placeholder="Search MyWeb…" required autocomplete="off" autofocus />
-    <input type="submit" value="Search" />
-  </form>
-  <div class="auth-buttons">
-    <button onclick="showAuth('login')">Sign In</button>
-    <button onclick="showAuth('signup')">Sign Up</button>
-  </div>
-  <div id="authModal">
+  <header class="sticky-header">
+    <h1>Custom Search</h1>
+    <nav>
+      <button id="settings-btn">⚙️</button>
+    </nav>
+  </header>
+
+  <main>
+    <form id="search-form">
+      <input type="text" id="search-input" placeholder="Search..." required />
+      <button type="submit">Search</button>
+    </form>
+  </main>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal hidden">
     <div class="modal-content">
-      <h3 id="authTitle">Login</h3>
-      <input type="text" id="authUsername" placeholder="Username" />
-      <input type="password" id="authPassword" placeholder="Password" />
-      <button id="authSubmit">Submit</button>
-      <button onclick="hideAuth()">Cancel</button>
+      <span id="close-modal" class="close">&times;</span>
+      <h2>Settings</h2>
+      <label for="theme-toggle">Dark Mode:</label>
+      <input type="checkbox" id="theme-toggle" />
+      <br/>
+      <label for="wallpaper-selector">Wallpaper:</label>
+      <select id="wallpaper-selector">
+        <option value="default">Default</option>
+        <option value="stars">Stars</option>
+        <option value="forest">Forest</option>
+        <!-- Add more options as needed -->
+      </select>
     </div>
   </div>
-  <script>
-    let authMode = 'login';
-    function showAuth(mode) {
-      authMode = mode;
-      document.getElementById('authTitle').textContent = mode === 'login' ? 'Sign In' : 'Sign Up';
-      document.getElementById('authModal').style.display = 'flex';
-    }
-    function hideAuth() {
-      document.getElementById('authModal').style.display = 'none';
-    }
-    document.getElementById('authSubmit').onclick = () => {
-      const u = document.getElementById('authUsername').value.trim();
-      const p = document.getElementById('authPassword').value;
-      if (!u || !p) return alert('Fill both');
-      let users = JSON.parse(localStorage.getItem('users') || '{}');
-      if (authMode === 'signup') {
-        if (users[u]) return alert('User exists');
-        users[u] = btoa(p);
-        localStorage.setItem('users', JSON.stringify(users));
-        alert('Signed up');
-      } else {
-        if (!users[u] || users[u] !== btoa(p)) return alert('Invalid');
-        localStorage.setItem('user', u);
-        alert('Signed in');
-      }
-      hideAuth();
-    };
-  </script>
+
+  <script src="script.js"></script>
 </body>
 </html>
