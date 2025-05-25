@@ -94,7 +94,7 @@
       const query = document.getElementById('query').value.trim();
       if (!query) return;
 
-      const res = await fetch(`/search?q=${encodeURIComponent(query)}`);
+      const res = await fetch(`https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`);
       const data = await res.json();
 
       const resultsContainer = document.getElementById('results');
