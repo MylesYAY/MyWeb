@@ -2,43 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Custom Search Home</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyWeb - Search</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="sticky-header">
-    <h1>Custom Search</h1>
-    <nav>
-      <button id="settings-btn">⚙️</button>
-    </nav>
+  <header>
+    <h1>MyWeb</h1>
+    <form id="searchForm" action="/" method="GET">
+      <input type="text" id="searchInput" name="q" placeholder="Search the web..." required />
+      <button type="submit">Search</button>
+    </form>
+    <button id="darkToggle">🌙</button>
   </header>
 
   <main>
-    <form id="search-form">
-      <input type="text" id="search-input" placeholder="Search..." required />
-      <button type="submit">Search</button>
-    </form>
+    <section id="results"></section>
   </main>
 
-  <!-- Settings Modal -->
-  <div id="settings-modal" class="modal hidden">
-    <div class="modal-content">
-      <span id="close-modal" class="close">&times;</span>
-      <h2>Settings</h2>
-      <label for="theme-toggle">Dark Mode:</label>
-      <input type="checkbox" id="theme-toggle" />
-      <br/>
-      <label for="wallpaper-selector">Wallpaper:</label>
-      <select id="wallpaper-selector">
-        <option value="default">Default</option>
-        <option value="stars">Stars</option>
-        <option value="forest">Forest</option>
-        <!-- Add more options as needed -->
-      </select>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
