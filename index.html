@@ -4,55 +4,41 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MyWeb</title>
-  <link rel="icon" href="favicon.png" type="image/png" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="main.js"></script>
 </head>
 <body>
   <header>
-    <h1>MyWeb</h1>
-    <form id="searchForm">
-      <input type="text" id="searchInput" placeholder="Search MyWeb..." required />
+    <form id="search-form">
+      <input type="text" id="search-input" placeholder="Search MyWeb..." />
       <button type="submit">Search</button>
     </form>
-    <button id="settingsBtn">⚙️</button>
-    <button id="darkToggle">🌙</button>
+    <div id="settings-icon" title="Settings">⚙️</div>
   </header>
 
-  <!-- Settings Modal -->
-  <div id="settingsModal" class="modal">
-    <div class="modal-content">
-      <h2>Settings</h2>
-      <label for="wallpaperSelect">Wallpaper</label>
-      <select id="wallpaperSelect">
-        <option value="">Default</option>
-        <option value="wallpapers/summer.jpg">Summer</option>
-        <option value="wallpapers/blue.jpg">Blue</option>
-        <option value="wallpapers/night.jpg">Night</option>
+  <div id="settings-panel" class="hidden">
+    <h3>Settings</h3>
+    <div>
+      <label for="theme-toggle">Dark Mode:</label>
+      <input type="checkbox" id="theme-toggle">
+    </div>
+    <div>
+      <label for="wallpaper-select">Wallpaper:</label>
+      <select id="wallpaper-select">
+        <option value="forest">Forest</option>
+        <option value="stars">Stars</option>
+        <option value="beach">Beach</option>
       </select>
-      <button onclick="closeSettings()">Close</button>
     </div>
   </div>
 
-  <!-- Home Section -->
-  <main id="homeView">
-    <div class="centered">
-      <h1 class="logo">MyWeb</h1>
-      <form id="homeSearchForm">
-        <input type="text" id="homeSearchInput" placeholder="Search MyWeb..." required />
-        <button type="submit">Search</button>
-      </form>
-    </div>
-  </main>
+  <main>
+    <section id="info-section">
+      <h1>Welcome to MyWeb</h1>
+      <p>MyWeb is your customized search engine experience. Change your wallpaper, toggle dark mode, and enjoy clean, simple search results powered by Google.</p>
+    </section>
 
-  <!-- Results Section -->
-  <main id="resultsView" class="hidden">
-    <section id="results"></section>
-    <aside id="dictionary">
-      <h2>Dictionary</h2>
-      <p>Search a word to see definitions here.</p>
-    </aside>
+    <section id="search-results"></section>
   </main>
-
-  <script src="main.js"></script>
 </body>
 </html>
