@@ -1,44 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MyWeb</title>
-  <link rel="stylesheet" href="styles.css">
-  <script defer src="main.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyWeb Search</title>
+  <style>
+    :root {
+      --accent-color: #007bff;
+      --background-color: #ffffff;
+      --text-color: #333;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+    }
+
+    header {
+      background-color: var(--accent-color);
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    form {
+      display: flex;
+      gap: 1rem;
+    }
+
+    input[type="text"] {
+      flex-grow: 1;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .results {
+      margin-top: 2rem;
+    }
+
+    .result {
+      border-bottom: 1px solid #ddd;
+      padding: 1rem 0;
+    }
+
+    .result a {
+      color: var(--accent-color);
+      text-decoration: none;
+      font-size: 1.2rem;
+    }
+
+    .result p {
+      margin: 0.5rem 0 0;
+    }
+  </style>
 </head>
 <body>
-  <header>
+  <header>MyWeb Search</header>
+  <main>
     <form id="search-form">
-      <input type="text" id="search-input" placeholder="Search MyWeb..." />
+      <input type="text" id="query" placeholder="Search the web...">
       <button type="submit">Search</button>
     </form>
-    <div id="settings-icon" title="Settings">⚙️</div>
-  </header>
-
-  <div id="settings-panel" class="hidden">
-    <h3>Settings</h3>
-    <div>
-      <label for="theme-toggle">Dark Mode:</label>
-      <input type="checkbox" id="theme-toggle">
-    </div>
-    <div>
-      <label for="wallpaper-select">Wallpaper:</label>
-      <select id="wallpaper-select">
-        <option value="forest">Forest</option>
-        <option value="stars">Stars</option>
-        <option value="beach">Beach</option>
-      </select>
-    </div>
-  </div>
-
-  <main>
-    <section id="info-section">
-      <h1>Welcome to MyWeb</h1>
-      <p>MyWeb is your customized search engine experience. Change your wallpaper, toggle dark mode, and enjoy clean, simple search results powered by Google.</p>
-    </section>
-
-    <section id="search-results"></section>
+    <div class="results" id="results"></div>
   </main>
+  <script>
+    document.getElementById('search-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const query = document.getElementById('query').value.trim();
+      if (!query) return;
+
+      const res = await fetch(`/search?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+
+      const resultsContainer = document.getElementById('results');
+      resultsContainer.innerHTML = '';
+
+      if (data.items && data.items.length > 0) {
+        data.items.forEach(item => {
+          const result = document.createElement('div');
+          result.className = 'result';
+
+          const title = document.createElement('a');
+          title.href = item.link;
+          title.textContent = item.title;
+          title.target = '_blank';
+
+          const snippet = document.createElement('p');
+          snippet.textContent = item.snippet;
+
+          result.appendChild(title);
+          result.appendChild(snippet);
+          resultsContainer.appendChild(result);
+        });
+      } else {
+        resultsContainer.innerHTML = '<p>No results found.</p>';
+      }
+    });
+  </script>
 </body>
 </html>
