@@ -1,21 +1,26 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MyWeb</title>
-  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="icon" href="favicon.png" type="image/png" />
   <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
     body, input, button {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
         Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      margin: 0;
       background: #fafafa;
       color: #202124;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
     }
     h1 {
       font-size: 3rem;
@@ -24,7 +29,8 @@
     }
     form {
       display: flex;
-      width: 90%; max-width: 600px;
+      width: 90%;
+      max-width: 600px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       border-radius: 9999px;
       overflow: hidden;
@@ -35,25 +41,29 @@
       padding: 14px 20px;
       border: none;
       font-size: 1.2rem;
-      outline: none;
     }
     input[type="submit"] {
+      flex: none;
+      height: auto;
       background: #1a73e8;
       color: white;
       border: none;
-      padding: 0 24px;
+      padding: 14px 24px;
       font-weight: 600;
       font-size: 1.1rem;
       cursor: pointer;
       transition: background 0.2s;
     }
-    input[type="submit"]:hover { background: #1558b0; }
+    input[type="submit"]:hover {
+      background: #1558b0;
+    }
     .auth-buttons {
       margin-top: 1rem;
       display: flex;
       gap: 1rem;
     }
     .auth-buttons button {
+      flex: none;
       padding: 0.5rem 1rem;
       border: 1px solid #1a73e8;
       background: white;
@@ -62,47 +72,53 @@
       cursor: pointer;
       transition: background 0.2s;
     }
-    .auth-buttons button:hover { background: #e8f0fe; }
-    /* Modal */
+    .auth-buttons button:hover {
+      background: #e8f0fe;
+    }
     #authModal {
       display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5);
-      align-items: center; justify-content: center;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
     }
     #authModal .modal-content {
       background: white;
       padding: 1.5rem;
       border-radius: 12px;
-      width: 90%; max-width: 320px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      display: flex; flex-direction: column; gap: 0.75rem;
+      width: 90%;
+      max-width: 320px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
     }
-    #authModal input { padding: 0.5rem; font-size: 1rem; }
-    #authModal button { padding: 0.5rem; font-size: 1rem; }
+    #authModal input, #authModal button {
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
   </style>
 </head>
 <body>
   <h1>MyWeb</h1>
   <form id="searchForm" action="results.html" method="GET">
-    <input type="text" name="q" placeholder="Search MyWeb…" required autocomplete="off" autofocus>
-    <input type="submit" value="Search">
+    <input type="text" name="q" placeholder="Search MyWeb…" required autocomplete="off" autofocus />
+    <input type="submit" value="Search" />
   </form>
   <div class="auth-buttons">
     <button onclick="showAuth('login')">Sign In</button>
     <button onclick="showAuth('signup')">Sign Up</button>
   </div>
-
   <div id="authModal">
     <div class="modal-content">
       <h3 id="authTitle">Login</h3>
-      <input type="text" id="authUsername" placeholder="Username">
-      <input type="password" id="authPassword" placeholder="Password">
+      <input type="text" id="authUsername" placeholder="Username" />
+      <input type="password" id="authPassword" placeholder="Password" />
       <button id="authSubmit">Submit</button>
       <button onclick="hideAuth()">Cancel</button>
     </div>
   </div>
-
   <script>
     let authMode = 'login';
     function showAuth(mode) {
@@ -110,19 +126,21 @@
       document.getElementById('authTitle').textContent = mode === 'login' ? 'Sign In' : 'Sign Up';
       document.getElementById('authModal').style.display = 'flex';
     }
-    function hideAuth() { document.getElementById('authModal').style.display = 'none'; }
+    function hideAuth() {
+      document.getElementById('authModal').style.display = 'none';
+    }
     document.getElementById('authSubmit').onclick = () => {
       const u = document.getElementById('authUsername').value.trim();
       const p = document.getElementById('authPassword').value;
-      if (!u || !p) return alert('Fill both fields');
-      let users = JSON.parse(localStorage.getItem('users')||'{}');
-      if (authMode==='signup') {
-        if(users[u]) return alert('User exists');
+      if (!u || !p) return alert('Fill both');
+      let users = JSON.parse(localStorage.getItem('users') || '{}');
+      if (authMode === 'signup') {
+        if (users[u]) return alert('User exists');
         users[u] = btoa(p);
         localStorage.setItem('users', JSON.stringify(users));
         alert('Signed up');
       } else {
-        if(!users[u]||users[u]!==btoa(p)) return alert('Invalid');
+        if (!users[u] || users[u] !== btoa(p)) return alert('Invalid');
         localStorage.setItem('user', u);
         alert('Signed in');
       }
