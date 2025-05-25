@@ -2,22 +2,55 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MyWeb - Search</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MyWeb</title>
+  <link rel="icon" href="favicon.png" type="image/png" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
     <h1>MyWeb</h1>
-    <form id="searchForm" action="results.html" method="GET">
-      <input type="text" id="searchInput" name="q" placeholder="Search the web..." required />
+    <form id="searchForm">
+      <input type="text" id="searchInput" placeholder="Search MyWeb..." required />
       <button type="submit">Search</button>
     </form>
+    <button id="settingsBtn">⚙️</button>
     <button id="darkToggle">🌙</button>
   </header>
 
-  <main>
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <h2>Settings</h2>
+      <label for="wallpaperSelect">Wallpaper</label>
+      <select id="wallpaperSelect">
+        <option value="">Default</option>
+        <option value="wallpapers/summer.jpg">Summer</option>
+        <option value="wallpapers/blue.jpg">Blue</option>
+        <option value="wallpapers/night.jpg">Night</option>
+      </select>
+      <button onclick="closeSettings()">Close</button>
+    </div>
+  </div>
+
+  <!-- Home Section -->
+  <main id="homeView">
+    <div class="centered">
+      <h1 class="logo">MyWeb</h1>
+      <form id="homeSearchForm">
+        <input type="text" id="homeSearchInput" placeholder="Search MyWeb..." required />
+        <button type="submit">Search</button>
+      </form>
+    </div>
+  </main>
+
+  <!-- Results Section -->
+  <main id="resultsView" class="hidden">
     <section id="results"></section>
+    <aside id="dictionary">
+      <h2>Dictionary</h2>
+      <p>Search a word to see definitions here.</p>
+    </aside>
   </main>
 
   <script src="main.js"></script>
