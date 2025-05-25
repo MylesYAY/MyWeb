@@ -2,247 +2,45 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Results – MyWeb</title>
-  <link rel="icon" href="favicon.png" type="image/png" />
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      overflow-x: hidden;
-      overflow-y: auto;
-    }
-    :root {
-      --accent: #1a73e8;
-      --bg: #fafafa;
-      --text: #202124;
-      --card: white;
-      --dark-bg: #202124;
-      --dark-text: #e8eaed;
-      --dark-card: #303134;
-      --radius: 12px;
-    }
-    body {
-      display: flex;
-      flex-direction: column;
-      background: var(--bg);
-      color: var(--text);
-      transition: background 0.3s, color 0.3s;
-    }
-    body.dark {
-      background: var(--dark-bg);
-      color: var(--dark-text);
-    }
-    header {
-      display: flex;
-      align-items: center;
-      padding: 12px 24px;
-      background: var(--card);
-      border-bottom: 1px solid #ddd;
-    }
-    body.dark header {
-      background: var(--dark-card);
-      border-color: #444;
-    }
-    header h1 {
-      font-size: 1.5rem;
-      margin: 0;
-      color: var(--accent);
-    }
-    form#searchForm {
-      flex: 1;
-      display: flex;
-      margin-left: 24px;
-      gap: 8px;
-    }
-    form#searchForm input[type="text"] {
-      flex: 1;
-      padding: 8px 12px;
-      border: 2px solid var(--accent);
-      border-radius: var(--radius);
-      outline: none;
-      background: transparent;
-      color: inherit;
-    }
-    form#searchForm button {
-      flex: none;
-      background: var(--accent);
-      border: none;
-      color: white;
-      padding: 8px 16px;
-      border-radius: var(--radius);
-      cursor: pointer;
-    }
-    #darkToggle {
-      margin-left: 16px;
-      background: transparent;
-      border: 2px solid var(--accent);
-      border-radius: var(--radius);
-      padding: 6px 12px;
-      cursor: pointer;
-      color: var(--accent);
-    }
-    #darkToggle:hover {
-      background: var(--accent);
-      color: white;
-    }
-    body.dark #darkToggle {
-      border-color: #8ab4f8;
-      color: #8ab4f8;
-    }
-    body.dark #darkToggle:hover {
-      background: #8ab4f8;
-      color: var(--dark-bg);
-    }
-    main {
-      flex: 1;
-      display: flex;
-      gap: 20px;
-      overflow: hidden;
-    }
-    #results, #dictionary {
-      overflow-y: auto;
-    }
-    #results {
-      flex: 3;
-      padding: 12px;
-    }
-    .result {
-      display: flex;
-      gap: 12px;
-      background: var(--card);
-      padding: 12px;
-      border-radius: var(--radius);
-      margin-bottom: 12px;
-    }
-    body.dark .result {
-      background: var(--dark-card);
-    }
-    .result-thumb {
-      width: 120px;
-      height: 80px;
-      object-fit: cover;
-      border-radius: var(--radius);
-      background: #eee;
-    }
-    .result-text h3 {
-      margin: 0 0 6px;
-      font-size: 1.1rem;
-    }
-    .result-text h3 a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-    .result-text p {
-      margin: 0;
-      font-size: 0.9rem;
-      color: #555;
-    }
-    body.dark .result-text p {
-      color: #ccc;
-    }
-    #dictionary {
-      flex: 1;
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 16px;
-    }
-    body.dark #dictionary {
-      background: var(--dark-card);
-    }
-    #dictionary h2 {
-      margin-top: 0;
-      border-bottom: 2px solid var(--accent);
-      padding-bottom: 4px;
-      color: var(--accent);
-    }
-    #dictionary ul {
-      padding-left: 20px;
-    }
-    #dictionary li {
-      margin-bottom: 8px;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Search Results</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header>
-    <h1>MyWeb</h1>
-    <form id="searchForm" action="results.html" method="GET">
-      <input type="text" name="q" id="searchInput" placeholder="Search MyWeb…" required />
-      <button type="submit">Search</button>
-    </form>
-    <button id="darkToggle">🌙</button>
+  <header class="sticky-header">
+    <h1>Custom Search</h1>
+    <nav>
+      <button id="settings-btn">⚙️</button>
+    </nav>
   </header>
+
   <main>
-    <section id="results"></section>
-    <aside id="dictionary">
-      <h2>Dictionary</h2>
-      <p>Search a word to see definitions here.</p>
+    <section id="search-results">
+      <!-- Search results will be injected here -->
+    </section>
+    <aside id="dictionary-panel">
+      <!-- Dictionary definitions or related content -->
     </aside>
   </main>
-  <script>
-    const darkToggle = document.getElementById('darkToggle');
-    if (localStorage.getItem('dark') === 'true') {
-      document.body.classList.add('dark');
-      darkToggle.textContent = '☀️';
-    }
-    darkToggle.addEventListener('click', () => {
-      document.body.classList.toggle('dark');
-      const isDark = document.body.classList.contains('dark');
-      localStorage.setItem('dark', isDark);
-      darkToggle.textContent = isDark ? '☀️' : '🌙';
-    });
 
-    const params = new URLSearchParams(location.search);
-    const q = params.get('q');
-    document.getElementById('searchInput').value = q || '';
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal hidden">
+    <div class="modal-content">
+      <span id="close-modal" class="close">&times;</span>
+      <h2>Settings</h2>
+      <label for="theme-toggle">Dark Mode:</label>
+      <input type="checkbox" id="theme-toggle" />
+      <br/>
+      <label for="wallpaper-selector">Wallpaper:</label>
+      <select id="wallpaper-selector">
+        <option value="default">Default</option>
+        <option value="stars">Stars</option>
+        <option value="forest">Forest</option>
+        <!-- Add more options as needed -->
+      </select>
+    </div>
+  </div>
 
-    async function loadResults() {
-      if (!q) return;
-      const res = await fetch(`https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(q)}`);
-      const data = await res.json();
-      const container = document.getElementById('results');
-      container.innerHTML = '';
-      (data.items || []).forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'result';
-        const img = document.createElement('img');
-        img.className = 'result-thumb';
-        img.src = item.pagemap?.cse_thumbnail?.[0]?.src || '';
-        const txt = document.createElement('div');
-        txt.className = 'result-text';
-        txt.innerHTML = `<h3><a href="${item.link}" target="_blank">${item.title}</a></h3><p>${item.snippet}</p>`;
-        if (img.src) div.appendChild(img);
-        div.appendChild(txt);
-        container.appendChild(div);
-      });
-    }
-
-    async function loadDict() {
-      if (!q) return;
-      const resp = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(q.split(' ')[0])}`);
-      const d = await resp.json();
-      const dict = document.getElementById('dictionary');
-      if (Array.isArray(d)) {
-        dict.innerHTML = '<h2>Dictionary</h2>';
-        d[0].meanings.forEach(m => {
-          const pos = document.createElement('strong');
-          pos.textContent = m.partOfSpeech;
-          dict.appendChild(pos);
-          const ul = document.createElement('ul');
-          m.definitions.forEach(def => {
-            const li = document.createElement('li');
-            li.textContent = def.definition;
-            if (def.example) li.innerHTML += `<br><em>"${def.example}"</em>`;
-            ul.appendChild(li);
-          });
-          dict.appendChild(ul);
-        });
-      }
-    }
-
-    loadResults();
-    loadDict();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
