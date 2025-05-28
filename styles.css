@@ -1,1 +1,71 @@
+:root {
+  --bg: #ffffff;
+  --text: #000000;
+  --accent: #3b82f6;
+}
 
+body.dark {
+  --bg: #121212;
+  --text: #ffffff;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+header {
+  padding: 1em;
+  background-color: var(--accent);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  margin: 0;
+}
+
+form {
+  display: flex;
+  gap: 0.5em;
+}
+
+#searchInput {
+  padding: 0.5em;
+  width: 200px;
+}
+
+main {
+  padding: 2em;
+  text-align: center;
+}
+
+#results {
+  margin-top: 2em;
+  text-align: left;
+}
+
+.result {
+  margin-bottom: 1.5em;
+}
+
+#settingsModal {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  color: var(--text);
+  padding: 1em;
+  border: 1px solid var(--text);
+  z-index: 1000;
+  display: none;
+}
+
+.hidden {
+  display: none;
+}
