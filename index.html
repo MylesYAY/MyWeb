@@ -2,37 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MyWeb</title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" href="favicon.png" />
 </head>
 <body>
   <header>
     <h1>MyWeb</h1>
-    <form id="searchForm">
-      <input type="text" id="searchInput" name="q" placeholder="Search MyWeb…" required />
-      <button type="submit">Search</button>
-    </form>
-    <button id="settingsBtn">⚙️</button>
+    <div class="search-wrapper">
+      <input type="text" id="search-input" placeholder="Search MyWeb..." />
+      <button id="search-btn">🔍</button>
+    </div>
+    <div class="settings-dropdown">
+      <button id="settings-btn">⚙️</button>
+      <div id="settings-menu" class="dropdown-content hidden">
+        <label>Theme:</label>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+    </div>
   </header>
 
-  <main>
-    <div id="infoBox">
+  <main id="main-content">
+    <div id="homepage-info">
       <h2>Welcome to MyWeb</h2>
-      <p>A simple custom search engine powered by Google CSE and Cloudflare Workers.</p>
+      <p>Your modern search engine experience powered by Google Custom Search.</p>
     </div>
-    <section id="results"></section>
+    <div id="results" class="hidden"></div>
   </main>
-
-  <div id="settingsModal" class="hidden">
-    <h3>Settings</h3>
-    <label>
-      <input type="checkbox" id="darkToggle" />
-      Dark Mode
-    </label>
-    <button id="closeSettings">Close</button>
-  </div>
 
   <script src="main.js"></script>
 </body>
