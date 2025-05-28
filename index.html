@@ -1,126 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MyWeb Search</title>
-  <style>
-    :root {
-      --accent-color: #007bff;
-      --background-color: #ffffff;
-      --text-color: #333;
-    }
-
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: var(--background-color);
-      color: var(--text-color);
-    }
-
-    header {
-      background-color: var(--accent-color);
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.5rem;
-    }
-
-    main {
-      max-width: 800px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-
-    form {
-      display: flex;
-      gap: 1rem;
-    }
-
-    input[type="text"] {
-      flex-grow: 1;
-      padding: 0.5rem;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    button {
-      background-color: var(--accent-color);
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    .results {
-      margin-top: 2rem;
-    }
-
-    .result {
-      border-bottom: 1px solid #ddd;
-      padding: 1rem 0;
-    }
-
-    .result a {
-      color: var(--accent-color);
-      text-decoration: none;
-      font-size: 1.2rem;
-    }
-
-    .result p {
-      margin: 0.5rem 0 0;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MyWeb</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="favicon.png" />
 </head>
 <body>
-  <header>MyWeb Search</header>
-  <main>
-    <form id="search-form">
-      <input type="text" id="query" placeholder="Search the web...">
+  <header>
+    <h1>MyWeb</h1>
+    <form id="searchForm">
+      <input type="text" id="searchInput" name="q" placeholder="Search MyWeb…" required />
       <button type="submit">Search</button>
     </form>
-    <div class="results" id="results"></div>
+    <button id="settingsBtn">⚙️</button>
+  </header>
+
+  <main>
+    <div id="infoBox">
+      <h2>Welcome to MyWeb</h2>
+      <p>A simple custom search engine powered by Google CSE and Cloudflare Workers.</p>
+    </div>
+    <section id="results"></section>
   </main>
-  <script>
-    document.getElementById('search-form').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const query = document.getElementById('query').value.trim();
-      if (!query) return;
 
-      const res = await fetch(`https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`);
-      const data = await res.json();
+  <div id="settingsModal" class="hidden">
+    <h3>Settings</h3>
+    <label>
+      <input type="checkbox" id="darkToggle" />
+      Dark Mode
+    </label>
+    <button id="closeSettings">Close</button>
+  </div>
 
-      const resultsContainer = document.getElementById('results');
-      resultsContainer.innerHTML = '';
-
-      if (data.items && data.items.length > 0) {
-        data.items.forEach(item => {
-          const result = document.createElement('div');
-          result.className = 'result';
-
-          const title = document.createElement('a');
-          title.href = item.link;
-          title.textContent = item.title;
-          title.target = '_blank';
-
-          const snippet = document.createElement('p');
-          snippet.textContent = item.snippet;
-
-          result.appendChild(title);
-          result.appendChild(snippet);
-          resultsContainer.appendChild(result);
-        });
-      } else {
-        resultsContainer.innerHTML = '<p>No results found.</p>';
-      }
-    });
-  </script>
+  <script src="main.js"></script>
 </body>
 </html>
