@@ -5,18 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MyWeb</title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="icon" href="favicon.png" type="image/png" />
 </head>
 <body>
   <header>
     <div class="logo">MyWeb</div>
+
     <form id="searchForm">
-      <input type="text" id="searchInput" name="q" placeholder="Search MyWeb…" />
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Search MyWeb..."
+        required
+        autocomplete="off"
+      />
       <button type="submit">Search</button>
     </form>
+
     <div class="settings-container">
       <button id="settingsBtn">⚙️</button>
-      <div id="settingsMenu" class="hidden">
+      <div id="settingsMenu" class="dropdown hidden">
         <label>
           <input type="checkbox" id="darkToggle" />
           Dark Mode
@@ -26,17 +34,21 @@
   </header>
 
   <main>
-    <div id="homeInfo">
+    <section id="infoSection">
       <h1>Welcome to MyWeb</h1>
-      <p>Your custom search engine powered by Google Search API & Cloudflare Workers.</p>
-    </div>
-    <div id="resultsSection" class="hidden">
-      <section id="results"></section>
+      <p>
+        MyWeb is your custom search engine experience. Enter a query above to
+        get started.
+      </p>
+    </section>
+
+    <section id="resultsSection" class="hidden">
+      <div id="results"></div>
       <aside id="dictionary">
         <h2>Dictionary</h2>
         <div id="dictContent">Search a word to see definitions here.</div>
       </aside>
-    </div>
+    </section>
   </main>
 
   <script src="main.js"></script>
