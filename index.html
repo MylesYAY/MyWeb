@@ -4,29 +4,92 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MyWeb</title>
-  <link rel="icon" href="favicon.png" />
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    :root {
+      --bg-light: #fff;
+      --text-light: #111;
+      --bg-dark: #121212;
+      --text-dark: #eee;
+      --accent: #0078d4;
+    }
+    body {
+      margin: 0; font-family: sans-serif;
+      background: var(--bg-light); color: var(--text-light);
+      transition: background .3s, color .3s;
+      display: flex; flex-direction: column; min-height: 100vh;
+    }
+    body.dark {
+      background: var(--bg-dark); color: var(--text-dark);
+    }
+    header {
+      display: flex; align-items: center;
+      background: var(--accent); color: #fff;
+      padding: 0.75rem 1rem; position: sticky; top: 0; z-index: 100;
+    }
+    header .logo {
+      font-size: 1.25rem; font-weight: bold;
+    }
+    #searchForm {
+      flex: 1; display: flex; margin: 0 1rem;
+    }
+    #searchInput {
+      flex: 1; padding: .5rem; border: none;
+      border-radius: 4px 0 0 4px; font-size: 1rem;
+    }
+    #searchForm button {
+      padding: .5rem 1rem; border: none;
+      background: #005a9e; color: #fff;
+      border-radius: 0 4px 4px 0; cursor: pointer;
+    }
+    #searchForm button:hover { background: #004b89; }
+    .settings {
+      position: relative;
+    }
+    #settingsBtn {
+      background: transparent; border: none;
+      color: #fff; font-size: 1.2rem; cursor: pointer;
+    }
+    #settingsMenu {
+      position: absolute; top: 120%; right: 0;
+      background: #fff; color: #000; border: 1px solid #ccc;
+      padding: .5rem; border-radius: 4px; display: none;
+    }
+    body.dark #settingsMenu {
+      background: #222; color: #eee; border-color: #555;
+    }
+    main {
+      flex: 1; padding: 2rem;
+    }
+    #infoSection {
+      text-align: center; margin-top: 4rem;
+    }
+    #resultsSection {
+      display: none; margin-top: 2rem;
+    }
+    .result {
+      background: rgba(0,0,0,0.03); padding: 1rem;
+      margin-bottom: 1rem; border-radius: 4px;
+    }
+    .result h3 { margin: 0 . .5rem; }
+    .result a { color: var(--accent); text-decoration: none; }
+    .result p { margin: .5rem 0 0; }
+    #dictionary {
+      margin-top: 2rem; padding: 1rem;
+      background: rgba(0,0,0,0.02); border-radius: 4px;
+    }
+  </style>
 </head>
 <body>
   <header>
     <div class="logo">MyWeb</div>
     <form id="searchForm" autocomplete="off">
-      <input
-        type="text"
-        id="searchInput"
-        name="q"
-        placeholder="Search MyWeb..."
-        required
-      />
-      <button type="submit">Search</button>
+      <input type="text" id="searchInput" placeholder="Search MyWeb…" required />
+      <button type="submit">🔍</button>
     </form>
-    <div class="settings-container">
+    <div class="settings">
       <button id="settingsBtn">⚙️</button>
-      <div id="settingsMenu" class="dropdown hidden">
-        <label>
-          <input type="checkbox" id="darkToggle" />
-          Dark Mode
-        </label>
+      <div id="settingsMenu">
+        <label><input type="checkbox" id="darkToggle" /> Dark Mode</label>
       </div>
     </div>
   </header>
@@ -34,18 +97,105 @@
   <main>
     <section id="infoSection">
       <h1>Welcome to MyWeb</h1>
-      <p>Your custom search engine, powered by Google CSE and Cloudflare Workers.</p>
+      <p>Enter a search above to get started.</p>
     </section>
 
-    <section id="resultsSection" class="hidden">
+    <section id="resultsSection">
       <div id="results"></div>
-      <aside id="dictionary">
+      <div id="dictionary">
         <h2>Dictionary</h2>
         <div id="dictContent">Search a word to see definitions here.</div>
-      </aside>
+      </div>
     </section>
   </main>
 
-  <script src="main.js"></script>
+  <script>
+    (function(){
+      const form = document.getElementById("searchForm");
+      const input = document.getElementById("searchInput");
+      const infoSection = document.getElementById("infoSection");
+      const resultsSection = document.getElementById("resultsSection");
+      const resultsDiv = document.getElementById("results");
+      const dictDiv = document.getElementById("dictContent");
+      const settingsBtn = document.getElementById("settingsBtn");
+      const settingsMenu = document.getElementById("settingsMenu");
+      const darkToggle = document.getElementById("darkToggle");
+
+      // Toggle settings menu
+      settingsBtn.addEventListener("click", () => {
+        settingsMenu.style.display = settingsMenu.style.display === "block" ? "none" : "block";
+      });
+
+      // Load theme
+      if(localStorage.getItem("theme")==="dark"){
+        document.body.classList.add("dark");
+        darkToggle.checked = true;
+      }
+      darkToggle.addEventListener("change", ()=>{
+        document.body.classList.toggle("dark", darkToggle.checked);
+        localStorage.setItem("theme", darkToggle.checked?"dark":"light");
+      });
+
+      // On load, check for ?q=
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get("q");
+      if(q){
+        input.value = q;
+        performSearch(q);
+      }
+
+      // Handle submit
+      form.addEventListener("submit", e=>{
+        e.preventDefault();
+        const query = input.value.trim();
+        if(!query) return;
+        history.replaceState(null,"",`?q=${encodeURIComponent(query)}`);
+        performSearch(query);
+      });
+
+      async function performSearch(query){
+        infoSection.style.display = "none";
+        resultsSection.style.display = "block";
+        resultsDiv.innerHTML = "<p>Searching...</p>";
+        dictDiv.textContent = "Loading definitions...";
+
+        // Fetch search results
+        try {
+          const res = await fetch(`https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`);
+          const data = await res.json();
+          if(!data.items || data.items.length===0){
+            resultsDiv.innerHTML = "<p>No results found.</p>";
+          } else {
+            resultsDiv.innerHTML = data.items.map(item=>`
+              <div class="result">
+                <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+                <p>${item.snippet}</p>
+              </div>
+            `).join("");
+          }
+        } catch(err){
+          console.error(err);
+          resultsDiv.innerHTML = "<p>Error fetching results.</p>";
+        }
+
+        // Fetch dictionary
+        try {
+          const word = query.split(" ")[0];
+          const r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+          const defs = await r.json();
+          if(Array.isArray(defs)){
+            dictDiv.innerHTML = defs[0].meanings.map(m=>`
+              <strong>${m.partOfSpeech}</strong>
+              <ul>${m.definitions.map(d=>`<li>${d.definition}</li>`).join("")}</ul>
+            `).join("");
+          } else {
+            dictDiv.textContent = "No definitions found.";
+          }
+        } catch {
+          dictDiv.textContent = "Error loading definitions.";
+        }
+      }
+    })();
+  </script>
 </body>
 </html>
