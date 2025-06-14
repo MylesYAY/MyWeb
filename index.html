@@ -2,35 +2,41 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MyWeb</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/png" href="favicon.png" />
 </head>
 <body>
   <header>
-    <h1>MyWeb</h1>
-    <div class="search-wrapper">
-      <input type="text" id="search-input" placeholder="Search MyWeb..." />
-      <button id="search-btn">🔍</button>
-    </div>
-    <div class="settings-dropdown">
-      <button id="settings-btn">⚙️</button>
-      <div id="settings-menu" class="dropdown-content hidden">
-        <label>Theme:</label>
-        <select id="theme-select">
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-        </select>
+    <div class="logo">MyWeb</div>
+    <form id="searchForm">
+      <input type="text" id="searchInput" name="q" placeholder="Search MyWeb…" />
+      <button type="submit">Search</button>
+    </form>
+    <div class="settings-container">
+      <button id="settingsBtn">⚙️</button>
+      <div id="settingsMenu" class="hidden">
+        <label>
+          <input type="checkbox" id="darkToggle" />
+          Dark Mode
+        </label>
       </div>
     </div>
   </header>
 
-  <main id="main-content">
-    <div id="homepage-info">
-      <h2>Welcome to MyWeb</h2>
-      <p>Your modern search engine experience powered by Google Custom Search.</p>
+  <main>
+    <div id="homeInfo">
+      <h1>Welcome to MyWeb</h1>
+      <p>Your custom search engine powered by Google Search API & Cloudflare Workers.</p>
     </div>
-    <div id="results" class="hidden"></div>
+    <div id="resultsSection" class="hidden">
+      <section id="results"></section>
+      <aside id="dictionary">
+        <h2>Dictionary</h2>
+        <div id="dictContent">Search a word to see definitions here.</div>
+      </aside>
+    </div>
   </main>
 
   <script src="main.js"></script>
