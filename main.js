@@ -1,73 +1,52 @@
-const searchInput = document.getElementById("search-input");
-const searchBtn = document.getElementById("search-btn");
-const resultsDiv = document.getElementById("results");
-const homepageInfo = document.getElementById("homepage-info");
-const themeSelect = document.getElementById("theme-select");
-const settingsBtn = document.getElementById("settings-btn");
-const settingsMenu = document.getElementById("settings-menu");
-
-// Toggle settings dropdown
-settingsBtn.addEventListener("click", () => {
-  settingsMenu.classList.toggle("hidden");
-});
-
-// Apply theme
-themeSelect.addEventListener("change", () => {
-  document.body.dataset.theme = themeSelect.value;
-  localStorage.setItem("theme", themeSelect.value);
-});
-
-// Load saved theme
 document.addEventListener("DOMContentLoaded", () => {
-  const savedTheme = localStorage.getItem("theme") || "light";
-  document.body.dataset.theme = savedTheme;
-  themeSelect.value = savedTheme;
+  const params = new URLSearchParams(window.location.search);
+  const query = params.get("q");
 
-  const query = new URLSearchParams(window.location.search).get("q");
+  const searchForm = document.getElementById("searchForm");
+  const searchInput = document.getElementById("searchInput");
+  const resultsSection = document.getElementById("results");
+
+  if (searchForm) {
+    searchForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const value = searchInput.value.trim();
+      if (value) {
+        window.location.href = `?q=${encodeURIComponent(value)}`;
+      }
+    });
+  }
+
   if (query) {
     searchInput.value = query;
-    performSearch(query);
+    fetchResults(query);
+  }
+
+  function fetchResults(query) {
+    fetch(`https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        resultsSection.innerHTML = "";
+        if (!data.items || data.items.length === 0) {
+          resultsSection.innerHTML = "<p>No results found.</p>";
+          return;
+        }
+        data.items.forEach((item) => {
+          const resultDiv = document.createElement("div");
+          resultDiv.className = "result";
+
+          const title = `<h3><a href="${item.link}" target="_blank">${item.title}</a></h3>`;
+          const snippet = `<p>${item.snippet}</p>`;
+          const thumb = item.pagemap?.cse_thumbnail?.[0]?.src
+            ? `<img src="${item.pagemap.cse_thumbnail[0].src}" alt="thumbnail" class="result-thumb">`
+            : "";
+
+          resultDiv.innerHTML = `${thumb}<div class="result-text">${title}${snippet}</div>`;
+          resultsSection.appendChild(resultDiv);
+        });
+      })
+      .catch((err) => {
+        resultsSection.innerHTML = `<p>Error fetching results: ${err.message}</p>`;
+        console.error(err);
+      });
   }
 });
-
-// Search button
-searchBtn.addEventListener("click", () => {
-  const query = searchInput.value.trim();
-  if (query) {
-    window.history.pushState({}, "", `?q=${encodeURIComponent(query)}`);
-    performSearch(query);
-  }
-});
-
-function performSearch(query) {
-  resultsDiv.innerHTML = "<p>Loading...</p>";
-  resultsDiv.classList.remove("hidden");
-  homepageInfo.classList.add("hidden");
-
-  fetch(`https://bob.mylesjohn2012.workers.dev/?q=${encodeURIComponent(query)}`)
-    .then(res => res.json())
-    .then(data => {
-      resultsDiv.innerHTML = "";
-      if (!data.items || data.items.length === 0) {
-        resultsDiv.innerHTML = "<p>No results found.</p>";
-        return;
-      }
-
-      for (const item of data.items) {
-        const div = document.createElement("div");
-        div.className = "result";
-        div.innerHTML = `
-          <a href="${item.link}" target="_blank">
-            <h3>${item.title}</h3>
-            <p>${item.snippet}</p>
-            <small>${item.link}</small>
-          </a>
-        `;
-        resultsDiv.appendChild(div);
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      resultsDiv.innerHTML = "<p>Error fetching results.</p>";
-    });
-}
