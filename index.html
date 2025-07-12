@@ -64,7 +64,7 @@
       const resultDiv = document.getElementById('result');
       resultDiv.innerHTML = "🔄 Thinking...";
 
-      const res = await fetch(`https://YOUR_WORKER_URL.workers.dev/?q=${encodeURIComponent(input)}`);
+      const res = await fetch(`https://myweb2.workers.dev/?q=${encodeURIComponent(input)}`);
       const data = await res.json();
 
       resultDiv.innerHTML = data.answer;
