@@ -7,77 +7,172 @@
   <title>MyWeb</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <style>
+    :root {
+      --bg-color: #fdfdfd;
+      --text-color: #333;
+      --accent: #007BFF;
+      --card-bg: #fff;
+    }
+
+    body.dark {
+      --bg-color: #121212;
+      --text-color: #eee;
+      --card-bg: #1e1e1e;
+    }
+
     body {
-      background-color: #fdfdfd; /* Off white */
-      color: #333;
-      font-family: Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Segoe UI', Tahoma, sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 50px;
+      transition: background 0.3s, color 0.3s;
     }
 
     h1 {
-      color: #007BFF; /* Blue accent */
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .search-box {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
     }
 
     input[type="text"] {
       width: 300px;
       padding: 10px;
-      border: 2px solid #007BFF;
+      border: 2px solid var(--accent);
       border-radius: 5px;
       font-size: 16px;
+      outline: none;
     }
 
     button {
       padding: 10px 20px;
-      margin-left: 10px;
+      margin: 5px;
       border: none;
-      background-color: #007BFF;
+      background-color: var(--accent);
       color: white;
       border-radius: 5px;
       cursor: pointer;
       font-size: 16px;
+      transition: background 0.3s;
     }
 
     button:hover {
       background-color: #0056b3;
     }
 
-    #result {
+    #result, #images {
       margin-top: 30px;
-      max-width: 600px;
+      max-width: 700px;
       text-align: left;
+    }
+
+    .history {
+      margin-top: 30px;
+      max-width: 700px;
+      text-align: left;
+    }
+
+    .history button {
+      margin: 5px 5px 0 0;
+      background-color: var(--card-bg);
+      border: 1px solid var(--accent);
+      color: var(--text-color);
+    }
+
+    .toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+    }
+
+    img.thumb {
+      width: 150px;
+      height: auto;
+      border-radius: 8px;
+      margin: 5px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
   </style>
 </head>
 <body>
-  <h1>MyWeb - Wikipedia Summary</h1>
-  <div>
-    <input type="text" id="searchInput" placeholder="Enter a topic...">
-    <button onclick="searchWikipedia()">Search</button>
+  <button class="toggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+  <h1>MyWeb</h1>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search Wikipedia...">
+    <button onclick="searchWikipedia()">Summary</button>
+    <button onclick="searchImages()">Images</button>
   </div>
+
   <div id="result"></div>
+  <div id="images"></div>
+
+  <div class="history">
+    <h3>Search History</h3>
+    <div id="history"></div>
+  </div>
 
   <script>
+    // Dark Mode
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+      localStorage.setItem('darkMode', document.body.classList.contains('dark'));
+    }
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark');
+    }
+
+    // Search History
+    function addToHistory(term) {
+      let history = JSON.parse(localStorage.getItem('history')) || [];
+      if (!history.includes(term)) {
+        history.push(term);
+        localStorage.setItem('history', JSON.stringify(history));
+      }
+      displayHistory();
+    }
+
+    function displayHistory() {
+      let history = JSON.parse(localStorage.getItem('history')) || [];
+      const historyDiv = document.getElementById('history');
+      historyDiv.innerHTML = '';
+      history.slice().reverse().forEach(term => {
+        const btn = document.createElement('button');
+        btn.innerText = term;
+        btn.onclick = () => {
+          document.getElementById('searchInput').value = term;
+          searchWikipedia();
+        };
+        historyDiv.appendChild(btn);
+      });
+    }
+    displayHistory();
+
+    // Wikipedia Summary
     async function searchWikipedia() {
       const query = document.getElementById('searchInput').value.trim();
       const resultDiv = document.getElementById('result');
+      const imagesDiv = document.getElementById('images');
+      imagesDiv.innerHTML = '';
 
       if (!query) {
         resultDiv.innerHTML = "<p>Please enter a search term.</p>";
         return;
       }
 
-      resultDiv.innerHTML = "<p>Loading...</p>";
+      addToHistory(query);
+      resultDiv.innerHTML = "<p>Loading summary...</p>";
 
       try {
         const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
-        
-        if (!response.ok) {
-          throw new Error("No summary found.");
-        }
-
+        if (!response.ok) throw new Error("No summary found.");
         const data = await response.json();
 
         if (data.extract) {
@@ -89,8 +184,58 @@
         } else {
           resultDiv.innerHTML = "<p>No summary found.</p>";
         }
-      } catch (error) {
-        resultDiv.innerHTML = "<p>Error fetching summary. Try another term.</p>";
+      } catch (err) {
+        resultDiv.innerHTML = "<p>Error fetching summary.</p>";
+      }
+    }
+
+    // Wikipedia Images
+    async function searchImages() {
+      const query = document.getElementById('searchInput').value.trim();
+      const resultDiv = document.getElementById('result');
+      const imagesDiv = document.getElementById('images');
+      resultDiv.innerHTML = '';
+      imagesDiv.innerHTML = "<p>Loading images...</p>";
+
+      if (!query) {
+        imagesDiv.innerHTML = "<p>Please enter a search term.</p>";
+        return;
+      }
+
+      addToHistory(query);
+
+      try {
+        const response = await fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=images&titles=${encodeURIComponent(query)}&format=json&origin=*`);
+        const data = await response.json();
+        const pages = data.query.pages;
+        let imageTitles = [];
+
+        for (const pageId in pages) {
+          const page = pages[pageId];
+          if (page.images) {
+            imageTitles = page.images.map(img => img.title).filter(title => title.match(/\.(jpg|jpeg|png|gif|svg)$/i));
+          }
+        }
+
+        if (imageTitles.length === 0) {
+          imagesDiv.innerHTML = "<p>No images found.</p>";
+          return;
+        }
+
+        // Build thumbnail URLs using Wikimedia Commons
+        imagesDiv.innerHTML = '';
+        for (const title of imageTitles) {
+          const filename = title.replace("File:", "");
+          const thumbUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(filename)}?width=300`;
+          const img = document.createElement('img');
+          img.src = thumbUrl;
+          img.alt = filename;
+          img.className = 'thumb';
+          imagesDiv.appendChild(img);
+        }
+
+      } catch (err) {
+        imagesDiv.innerHTML = "<p>Error fetching images.</p>";
       }
     }
   </script>
