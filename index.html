@@ -5,19 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MyWeb</title>
   <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="manifest" href="manifest.json">
   <style>
     :root {
       --bg-color: #fdfdfd;
       --text-color: #333;
       --accent: #007BFF;
-      --card-bg: #fff;
+      --sidebar-bg: #f0f0f0;
     }
 
     body.dark {
       --bg-color: #121212;
       --text-color: #eee;
-      --card-bg: #1e1e1e;
+      --sidebar-bg: #1e1e1e;
     }
 
     body {
@@ -25,10 +24,20 @@
       color: var(--text-color);
       font-family: 'Segoe UI', Tahoma, sans-serif;
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 50px;
+      min-height: 100vh;
       transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
+    }
+
+    .main {
+      flex: 1;
+      padding: 50px;
+      margin-left: 250px; /* Sidebar width */
+      transition: margin-left 0.3s;
+    }
+
+    .collapsed .main {
+      margin-left: 0;
     }
 
     h1 {
@@ -78,45 +87,105 @@
       text-align: left;
     }
 
-    .history {
-      margin-top: 30px;
-      max-width: 700px;
-      text-align: left;
+    /* Sidebar styles */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 250px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid #ccc;
+      overflow-y: auto;
+      transform: translateX(0);
+      transition: transform 0.3s;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      box-sizing: border-box;
     }
 
-    .history button {
-      margin: 5px 5px 0 0;
-      background-color: var(--card-bg);
+    .collapsed .sidebar {
+      transform: translateX(-100%);
+    }
+
+    .sidebar h3 {
+      margin-top: 0;
+    }
+
+    .history-buttons {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .history-buttons button {
+      display: block;
+      width: 100%;
+      margin: 5px 0;
+      background: none;
       border: 1px solid var(--accent);
       color: var(--text-color);
+      text-align: left;
+      padding: 8px;
+      border-radius: 5px;
     }
 
-    .toggle {
+    .clear-btn {
+      position: sticky;
+      bottom: 0;
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 15px;
+      cursor: pointer;
+      border-radius: 0;
+    }
+
+    /* Toggle Button */
+    .toggle-sidebar {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1000;
+    }
+
+    .toggle-dark {
       position: fixed;
       top: 20px;
       right: 20px;
+      z-index: 1000;
     }
   </style>
 </head>
 <body>
-  <button class="toggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
-  <h1>MyWeb</h1>
-  <p id="streak"></p>
+  <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+  <button class="toggle-dark" onclick="toggleDarkMode()">Toggle Dark Mode</button>
 
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search Wikipedia...">
-    <button onclick="searchWikipedia()">Search</button>
+  <div class="sidebar">
+    <h3>Search History</h3>
+    <div class="history-buttons" id="history"></div>
+    <button class="clear-btn" onclick="clearHistory()">Clear History</button>
   </div>
 
-  <div id="result"></div>
+  <div class="main">
+    <h1>MyWeb</h1>
+    <p id="streak"></p>
 
-  <div class="history">
-    <h3>Search History</h3>
-    <div id="history"></div>
-    <button onclick="clearHistory()">Clear History</button>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search Wikipedia...">
+      <button onclick="searchWikipedia()">Search</button>
+    </div>
+
+    <div id="result"></div>
   </div>
 
   <script>
+    // Sidebar toggle
+    function toggleSidebar() {
+      document.body.classList.toggle('collapsed');
+    }
+
     // Dark Mode
     function toggleDarkMode() {
       document.body.classList.toggle('dark');
@@ -158,7 +227,7 @@
 
     displayHistory();
 
-    // Wikipedia Summary Search
+    // Wikipedia Summary
     async function searchWikipedia() {
       const query = document.getElementById('searchInput').value.trim();
       const resultDiv = document.getElementById('result');
@@ -218,29 +287,6 @@
     }
 
     updateStreak();
-
-    // Notifications
-    if ("Notification" in window && Notification.permission !== "granted") {
-      Notification.requestPermission();
-    }
-
-    function sendReminderNotification() {
-      if (Notification.permission === "granted") {
-        new Notification("MyWeb Reminder", {
-          body: "Keep your streak alive! Search something today 🧠✨"
-        });
-      }
-    }
-
-    // Example: send a reminder after 10 seconds for demo
-    setTimeout(sendReminderNotification, 10000);
-
-    // Register Service Worker for PWA
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').then(() => {
-        console.log("Service Worker Registered");
-      });
-    }
   </script>
 </body>
 </html>
