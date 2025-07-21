@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="manifest.json">
-  <meta name="google-adsense-account" content="ca-pub-1169566460414673">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MyWeb</title>
   <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="manifest" href="manifest.json">
   <style>
     :root {
       --bg-color: #fdfdfd;
@@ -34,6 +33,11 @@
 
     h1 {
       color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    #streak {
+      font-size: 18px;
       margin-bottom: 20px;
     }
 
@@ -97,6 +101,7 @@
 <body>
   <button class="toggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
   <h1>MyWeb</h1>
+  <p id="streak"></p>
 
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="Search Wikipedia...">
@@ -108,6 +113,7 @@
   <div class="history">
     <h3>Search History</h3>
     <div id="history"></div>
+    <button onclick="clearHistory()">Clear History</button>
   </div>
 
   <script>
@@ -144,9 +150,15 @@
         historyDiv.appendChild(btn);
       });
     }
+
+    function clearHistory() {
+      localStorage.removeItem('history');
+      displayHistory();
+    }
+
     displayHistory();
 
-    // Wikipedia Summary
+    // Wikipedia Summary Search
     async function searchWikipedia() {
       const query = document.getElementById('searchInput').value.trim();
       const resultDiv = document.getElementById('result');
@@ -177,15 +189,58 @@
         resultDiv.innerHTML = "<p>Error fetching summary.</p>";
       }
     }
-  </script>
 
-  <script>
+    // Login Streak
+    function updateStreak() {
+      const today = new Date().toDateString();
+      const lastVisit = localStorage.getItem('lastVisitDate');
+      let streak = parseInt(localStorage.getItem('streak') || '0');
+
+      if (lastVisit === today) {
+        // Already counted today
+      } else {
+        if (lastVisit) {
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          if (new Date(lastVisit).toDateString() === yesterday.toDateString()) {
+            streak++;
+          } else {
+            streak = 1; // Missed a day
+          }
+        } else {
+          streak = 1; // First visit
+        }
+        localStorage.setItem('streak', streak);
+        localStorage.setItem('lastVisitDate', today);
+      }
+
+      document.getElementById('streak').innerText = `🔥 Login Streak: ${streak} day(s)`;
+    }
+
+    updateStreak();
+
+    // Notifications
+    if ("Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+
+    function sendReminderNotification() {
+      if (Notification.permission === "granted") {
+        new Notification("MyWeb Reminder", {
+          body: "Keep your streak alive! Search something today 🧠✨"
+        });
+      }
+    }
+
+    // Example: send a reminder after 10 seconds for demo
+    setTimeout(sendReminderNotification, 10000);
+
+    // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').then(() => {
         console.log("Service Worker Registered");
       });
     }
   </script>
-
 </body>
 </html>
