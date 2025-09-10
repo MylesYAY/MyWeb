@@ -11,7 +11,7 @@
       --bg-color: #0d0d0f;
       --text-color: #eaeaea;
       --accent: #00e0ff;
-      --card-bg: rgba(255, 255, 255, 0.05);
+      --card-bg: rgba(255, 255, 255, 0.08);
     }
 
     body {
@@ -21,45 +21,38 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      background: var(--bg-color);
       color: var(--text-color);
       font-family: 'Segoe UI', Tahoma, sans-serif;
       text-align: center;
-      transition: background 0.3s, color 0.3s;
+      overflow: hidden;
     }
 
-    body.dark {
-      --bg-color: #ffffff;
-      --text-color: #1a1a1a;
-      --accent: #007BFF;
-      --card-bg: rgba(0, 0, 0, 0.05);
+    /* Futuristic animated gradient background */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(270deg, #00e0ff, #ff00ff, #00ffa2, #007bff);
+      background-size: 800% 800%;
+      animation: gradientShift 20s ease infinite;
+      z-index: -1;
+      filter: blur(150px);
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     h1 {
       font-size: 3rem;
       margin-bottom: 20px;
       color: var(--accent);
-      text-shadow: 0 0 15px var(--accent);
-    }
-
-    /* Dark mode toggle */
-    .toggle-dark {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 10px 15px;
-      background: var(--card-bg);
-      border: 1px solid var(--accent);
-      border-radius: 6px;
-      color: var(--text-color);
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .toggle-dark:hover {
-      background: var(--accent);
-      color: #000;
-      box-shadow: 0 0 15px var(--accent);
+      text-shadow: 0 0 15px var(--accent), 0 0 30px var(--accent);
     }
 
     /* Search box */
@@ -80,6 +73,7 @@
       outline: none;
       background: var(--card-bg);
       color: var(--text-color);
+      box-shadow: 0 0 10px rgba(0, 224, 255, 0.4);
     }
 
     button {
@@ -92,11 +86,12 @@
       font-size: 16px;
       font-weight: bold;
       transition: all 0.3s;
+      box-shadow: 0 0 10px var(--accent);
     }
 
     button:hover {
       background: #00cce0;
-      box-shadow: 0 0 15px var(--accent);
+      box-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent);
     }
 
     /* Results */
@@ -107,7 +102,7 @@
       background: var(--card-bg);
       padding: 20px;
       border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0, 224, 255, 0.2);
+      box-shadow: 0 0 20px rgba(0, 224, 255, 0.3);
       backdrop-filter: blur(10px);
     }
 
@@ -119,8 +114,6 @@
   </style>
 </head>
 <body>
-  <button class="toggle-dark" onclick="toggleDarkMode()">Toggle Theme</button>
-
   <h1>MyWeb</h1>
 
   <div class="search-box">
@@ -131,15 +124,6 @@
   <div id="result"></div>
 
   <script>
-    // Dark Mode
-    function toggleDarkMode() {
-      document.body.classList.toggle('dark');
-      localStorage.setItem('darkMode', document.body.classList.contains('dark'));
-    }
-    if (localStorage.getItem('darkMode') === 'true') {
-      document.body.classList.add('dark');
-    }
-
     // Wikipedia Summary
     async function searchWikipedia() {
       const query = document.getElementById('searchInput').value.trim();
