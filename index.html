@@ -1,240 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MyWeb</title>
-  <link rel="icon" type="image/png" href="favicon.png">
-
-  <!-- Import Inter font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
   <style>
-    :root {
-      --bg-color: #1a1a1a;
-      --text-color: #eaeaea;
-      --accent: #00e0ff;
-      --card-bg: rgba(255, 255, 255, 0.05);
-    }
+    /* Import Inter font */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
     body {
       margin: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background: var(--bg-color);
-      color: var(--text-color);
       font-family: 'Inter', sans-serif;
-      text-align: center;
-      overflow: hidden;
-      cursor: none; /* Hide default cursor */
+      background: #111;
+      color: #fff;
+      overflow-x: hidden;
+      cursor: none; /* hide default cursor */
     }
 
-    /* Sparkling + drifting stars */
+    /* Starfield background */
     .stars {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: -2;
+      background: transparent;
       overflow: hidden;
+      z-index: -1;
     }
-
     .star {
       position: absolute;
-      width: 2px;
-      height: 2px;
       background: white;
       border-radius: 50%;
-      opacity: 0.7;
-      animation: twinkle 3s infinite ease-in-out, drift linear infinite;
+      opacity: 0.8;
+      animation: twinkle 3s infinite alternate;
     }
-
     @keyframes twinkle {
-      0%, 100% { opacity: 0.3; transform: scale(1); }
-      50% { opacity: 0.9; transform: scale(1.3); }
+      from { opacity: 0.2; }
+      to { opacity: 1; }
     }
 
-    @keyframes drift {
-      from { transform: translateY(0); }
-      to { transform: translateY(100vh); }
+    /* Centered search container */
+    .container {
+      text-align: center;
+      margin-top: 15vh;
     }
 
     h1 {
-      font-size: 2.8rem;
+      font-size: 3rem;
       margin-bottom: 20px;
-      color: var(--accent);
-      text-shadow: 0 0 6px var(--accent);
-      font-weight: 600;
-      z-index: 1;
+      color: #0ff;
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
     }
 
-    /* Search box */
-    .search-box {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      z-index: 1;
-    }
-
-    input[type="text"] {
-      width: 300px;
-      padding: 12px;
-      border: 2px solid var(--accent);
-      border-radius: 8px;
-      font-size: 16px;
-      outline: none;
-      background: var(--card-bg);
-      color: var(--text-color);
-      box-shadow: 0 0 6px rgba(0, 224, 255, 0.2);
-    }
-
-    button {
+    .search-bar {
       padding: 12px 20px;
+      font-size: 1rem;
       border: none;
-      background: var(--accent);
-      color: #000;
+      border-radius: 8px;
+      outline: none;
+      width: 350px;
+      background: #222;
+      color: #fff;
+      caret-color: #0ff;
+    }
+
+    .search-bar:focus {
+      background: #333;
+    }
+
+    .search-btn {
+      margin-left: 10px;
+      padding: 12px 20px;
+      font-size: 1rem;
+      background: #0ff;
+      color: #111;
+      border: none;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 16px;
       font-weight: 600;
-      transition: all 0.3s;
-      box-shadow: 0 0 8px rgba(0, 224, 255, 0.3);
-      font-family: 'Inter', sans-serif;
+      transition: background 0.3s;
     }
 
-    button:hover {
-      background: #00cce0;
-      box-shadow: 0 0 12px rgba(0, 224, 255, 0.5);
+    .search-btn:hover {
+      background: #0cc;
     }
 
-    /* Results */
-    #result {
-      margin-top: 30px;
-      max-width: 700px;
-      text-align: left;
-      background: var(--card-bg);
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0, 224, 255, 0.2);
-      backdrop-filter: blur(6px);
-      z-index: 1;
-    }
-
-    #result h2 {
-      margin-top: 0;
-      color: var(--accent);
-      text-shadow: 0 0 4px var(--accent);
-    }
-
-    /* Custom cursor */
+    /* Custom glowing cursor */
     .cursor {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 16px;
-      height: 16px;
+      width: 15px;
+      height: 15px;
+      background: #0ff;
       border-radius: 50%;
-      background: var(--accent);
       pointer-events: none;
+      box-shadow: 0 0 15px #0ff, 0 0 30px #0ff;
       transform: translate(-50%, -50%);
-      box-shadow: 0 0 12px var(--accent), 0 0 24px var(--accent);
-      z-index: 1000;
+      z-index: 9999;
+      transition: background 0.2s, box-shadow 0.2s;
     }
 
+    /* Dark cursor inside search bar */
+    .cursor.dark {
+      background: #444;
+      box-shadow: 0 0 10px #222;
+    }
+
+    /* Cursor trail */
     .trail {
       position: fixed;
-      top: 0;
-      left: 0;
       width: 10px;
       height: 10px;
+      background: rgba(0, 255, 255, 0.4);
       border-radius: 50%;
-      background: var(--accent);
-      opacity: 0.6;
       pointer-events: none;
       transform: translate(-50%, -50%);
-      box-shadow: 0 0 6px var(--accent);
-      z-index: 999;
       animation: fadeOut 0.6s forwards;
+      z-index: 9998;
     }
-
     @keyframes fadeOut {
-      from { opacity: 0.6; transform: scale(1); }
-      to { opacity: 0; transform: scale(0.5); }
+      to { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
     }
   </style>
 </head>
 <body>
   <div class="stars"></div>
 
-  <h1>MyWeb</h1>
-
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search Wikipedia...">
-    <button onclick="searchWikipedia()">Search</button>
+  <div class="container">
+    <h1>MyWeb</h1>
+    <input type="text" class="search-bar" placeholder="Search the web...">
+    <button class="search-btn">Search</button>
   </div>
-
-  <div id="result"></div>
 
   <div class="cursor" id="cursor"></div>
 
   <script>
-    // Generate random stars
+    // Create starfield
     const starsContainer = document.querySelector('.stars');
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 120; i++) {
       const star = document.createElement('div');
-      star.className = 'star';
-      star.style.top = Math.random() * 100 + 'vh';
-      star.style.left = Math.random() * 100 + 'vw';
-      star.style.animationDuration = (2 + Math.random() * 3) + 's, ' + (20 + Math.random() * 40) + 's';
+      const size = Math.random() * 2 + 1;
+      star.classList.add('star');
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
+      star.style.top = `${Math.random() * 100}%`;
+      star.style.left = `${Math.random() * 100}%`;
+      star.style.animationDuration = `${2 + Math.random() * 3}s`;
       starsContainer.appendChild(star);
     }
 
-    // Wikipedia Summary
-    async function searchWikipedia() {
-      const query = document.getElementById('searchInput').value.trim();
-      const resultDiv = document.getElementById('result');
-      if (!query) {
-        resultDiv.innerHTML = "<p>Please enter a search term.</p>";
-        return;
-      }
-      resultDiv.innerHTML = "<p>Loading...</p>";
-      try {
-        const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
-        if (!response.ok) throw new Error("No summary found.");
-        const data = await response.json();
-        if (data.extract) {
-          resultDiv.innerHTML = `
-            <h2>${data.title}</h2>
-            <p>${data.extract}</p>
-            <p><a href="${data.content_urls.desktop.page}" target="_blank">🔗 Read more on Wikipedia</a></p>
-          `;
-        } else {
-          resultDiv.innerHTML = "<p>No summary found.</p>";
-        }
-      } catch (err) {
-        resultDiv.innerHTML = "<p>Error fetching summary.</p>";
-      }
-    }
-
-    // Custom cursor with glow trail
+    // Custom cursor
     const cursor = document.getElementById('cursor');
     document.addEventListener('mousemove', e => {
       cursor.style.top = e.clientY + 'px';
       cursor.style.left = e.clientX + 'px';
 
+      // Create trailing effect
       const trail = document.createElement('div');
-      trail.className = 'trail';
+      trail.classList.add('trail');
       trail.style.top = e.clientY + 'px';
       trail.style.left = e.clientX + 'px';
       document.body.appendChild(trail);
-
       setTimeout(() => trail.remove(), 600);
+    });
+
+    // Switch cursor style on search bar hover
+    const searchBar = document.querySelector('.search-bar');
+    searchBar.addEventListener('mouseenter', () => {
+      cursor.classList.add('dark');
+    });
+    searchBar.addEventListener('mouseleave', () => {
+      cursor.classList.remove('dark');
     });
   </script>
 </body>
