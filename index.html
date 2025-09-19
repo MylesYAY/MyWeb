@@ -1,150 +1,366 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>MyWeb</title>
-<link rel="icon" type="image/png" href="favicon.png">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyWeb - Futuristic Search</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* ===== GENERAL STYLING ===== */
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #111;
+      color: #fff;
+      overflow-x: hidden;
+    }
 
-<style>
-  body {
-    margin: 0;
-    font-family: 'Inter', sans-serif;
-    background: #111;
-    color: #fff;
-    overflow: hidden;
-    cursor: none;
-  }
+    h1, h2, h3 {
+      margin: 0 0 10px;
+    }
 
-  .stars {
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: -2; overflow: hidden;
-  }
-  .star {
-    position: absolute;
-    background: white; border-radius: 50%; opacity: 0.7;
-    animation: drift linear infinite;
-  }
-  @keyframes drift { from { transform: translateY(0); } to { transform: translateY(100vh); } }
+    .container {
+      text-align: center;
+      padding: 50px 20px 100px;
+      position: relative;
+      z-index: 2;
+    }
 
-  .container {
-    text-align: center;
-    margin-top: 15vh;
-    z-index: 1; position: relative;
-  }
+    .tabs {
+      margin-bottom: 20px;
+    }
 
-  h1 {
-    font-size: 3rem; margin-bottom: 20px;
-    color: #0ff; text-shadow: 0 0 10px rgba(0,255,255,0.5);
-    font-weight: 600;
-  }
+    .tabs button {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #7df9ff;
+      padding: 8px 16px;
+      margin: 0 5px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
 
-  .search-bar {
-    padding: 12px 20px;
-    font-size: 1rem; border: none; border-radius: 8px;
-    outline: none; width: 350px; background: #222; color: #fff;
-    caret-color: #0ff;
-  }
-  .search-bar:focus { background: #333; }
+    .tabs button:hover {
+      background: #222;
+    }
 
-  .search-btn {
-    margin-left: 10px; padding: 12px 20px;
-    font-size: 1rem; background: #0ff; color: #111;
-    border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
-    transition: background 0.3s;
-  }
-  .search-btn:hover { background: #0cc; }
+    /* ===== SEARCH BOX ===== */
+    .search-box {
+      margin: 20px auto;
+      max-width: 500px;
+      display: flex;
+      border: 2px solid #7df9ff;
+      border-radius: 8px;
+      overflow: hidden;
+    }
 
-  #result {
-    margin: 30px auto 0 auto;
-    max-width: 700px; text-align: center;
-    background: rgba(255,255,255,0.05); padding: 20px;
-    border-radius: 12px; box-shadow: 0 0 10px rgba(0,255,255,0.2);
-    backdrop-filter: blur(6px);
-    z-index: 1; position: relative;
-    word-wrap: break-word;
-  }
+    .search-box input {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      color: #fff;
+      background: #222;
+    }
 
-  .trail {
-    position: fixed; width: 10px; height: 10px;
-    background: rgba(0,255,255,0.4); border-radius: 50%;
-    pointer-events: none; transform: translate(-50%,-50%);
-    animation: fadeOut 0.6s forwards; z-index: 9999;
-  }
-  @keyframes fadeOut { to { opacity:0; transform: translate(-50%, -50%) scale(0.3); } }
+    .search-box button {
+      padding: 12px 20px;
+      border: none;
+      background: #7df9ff;
+      color: #111;
+      cursor: pointer;
+      font-weight: bold;
+    }
 
-</style>
+    .search-box button:hover {
+      background: #5ad3e6;
+    }
+
+    /* ===== RESULTS ===== */
+    #results, #newsResults {
+      max-width: 800px;
+      margin: 20px auto;
+      text-align: left;
+    }
+
+    .resultItem {
+      margin-bottom: 15px;
+      padding: 10px;
+      background: rgba(30, 30, 30, 0.8);
+      border-radius: 8px;
+    }
+
+    .resultItem a {
+      color: #7df9ff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .resultItem a:hover {
+      text-decoration: underline;
+    }
+
+    /* ===== ELECTRIC BORDER ===== */
+    .electric-border {
+      position: relative;
+      border-radius: 12px;
+      overflow: visible;
+      isolation: isolate;
+      --electric-border-color: #7df9ff;
+      --eb-border-width: 2px;
+      padding: 15px;
+    }
+
+    .electric-border::before,
+    .electric-border::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border: var(--eb-border-width) solid var(--electric-border-color);
+      pointer-events: none;
+    }
+
+    .electric-border::before {
+      filter: blur(2px);
+      opacity: 0.7;
+      animation: pulse 4s infinite alternate;
+    }
+
+    .electric-border::after {
+      filter: blur(8px);
+      opacity: 0.4;
+      animation: pulse 6s infinite alternate-reverse;
+    }
+
+    @keyframes pulse {
+      from { box-shadow: 0 0 5px var(--electric-border-color); }
+      to   { box-shadow: 0 0 20px var(--electric-border-color); }
+    }
+
+    /* ===== NEWS TAB ===== */
+    #newsResults {
+      padding: 20px;
+      margin-top: 20px;
+      background: rgba(20, 20, 20, 0.85);
+      border-radius: 12px;
+      color: #fff;
+    }
+
+    .newsItem {
+      margin-bottom: 15px;
+    }
+
+    .newsButton {
+      background: none;
+      border: none;
+      color: #7df9ff;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .newsButton:hover {
+      text-decoration: underline;
+    }
+
+    .newsContent {
+      margin-top: 8px;
+      padding-left: 10px;
+      color: #ddd;
+      font-size: 0.95rem;
+    }
+
+    .date {
+      font-size: 0.9rem;
+      color: #999;
+    }
+
+    /* ===== LATEST NEWS FOOTER ===== */
+    #latestNews {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 10, 0.9);
+      border-top: 2px solid #7df9ff;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      text-align: center;
+      z-index: 5;
+    }
+
+    #latestNews span {
+      color: #7df9ff;
+      font-weight: bold;
+    }
+
+    /* ===== STARFIELD BACKGROUND ===== */
+    #starfield {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      background: #111;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-<div class="stars"></div>
+  <canvas id="starfield"></canvas>
 
-<div class="container">
-  <h1>MyWeb</h1>
-  <input type="text" class="search-bar" id="searchInput" placeholder="Ask LLaMA...">
-  <button class="search-btn" id="searchBtn">Search</button>
-  <div id="result">Your LLaMA response will appear here</div>
-</div>
+  <div class="container">
+    <h1>MyWeb</h1>
+    <p>Futuristic Wikipedia Search</p>
 
-<script>
-  // Stars
-  const starsContainer = document.querySelector('.stars');
-  for (let i=0;i<120;i++){
-    const star = document.createElement('div');
-    const size = Math.random()*2+1;
-    star.classList.add('star');
-    star.style.width = `${size}px`;
-    star.style.height = `${size}px`;
-    star.style.top = `${Math.random()*100}%`;
-    star.style.left = `${Math.random()*100}%`;
-    star.style.animationDuration = `${20+Math.random()*40}s`;
-    starsContainer.appendChild(star);
-  }
+    <div class="tabs">
+      <button id="searchTab">Search</button>
+      <button id="newsTab">News</button>
+    </div>
 
-  // Cursor trail
-  document.addEventListener('mousemove', e=>{
-    const trail = document.createElement('div');
-    trail.className='trail';
-    trail.style.top=e.clientY+'px';
-    trail.style.left=e.clientX+'px';
-    document.body.appendChild(trail);
-    setTimeout(()=>trail.remove(),600);
-  });
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search Wikipedia...">
+      <button id="searchBtn">Search</button>
+    </div>
 
-  // Hugging Face API call
-  async function searchLLaMA() {
-    const query = document.getElementById('searchInput').value.trim();
-    const resultDiv = document.getElementById('result');
-    if(!query){ resultDiv.innerHTML="<p>Please enter a query.</p>"; return; }
-    resultDiv.innerHTML="<p>Thinking...</p>";
+    <div id="results"></div>
+    <div id="newsResults" class="electric-border hidden">
+      <h2>Website News</h2>
+      <ul id="newsList"></ul>
+    </div>
+  </div>
 
-    const API_TOKEN = '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'; // replace with your token
-    const MODEL = 'meta-llama/Llama-2-7b-chat-hf';
+  <!-- Latest News Footer -->
+  <div id="latestNews">Latest: <span id="latestNewsText"></span></div>
 
-    try {
-      const response = await fetch(`https://api-inference.huggingface.co/models/${MODEL}`, {
-        method:'POST',
-        headers: {
-          'Authorization': `Bearer ${API_TOKEN}`,
-          'Content-Type':'application/json'
-        },
-        body: JSON.stringify({inputs: query})
-      });
-      const data = await response.json();
-      if(data.error) throw new Error(data.error);
-      resultDiv.innerHTML = data[0].generated_text || "No response";
-    } catch(err) {
-      resultDiv.innerHTML = `<p>Error: ${err.message}</p>`;
+  <script>
+    /* ===== STARFIELD ANIMATION ===== */
+    const canvas = document.getElementById("starfield");
+    const ctx = canvas.getContext("2d");
+    let stars = [];
+    let w, h;
+
+    function initStars() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+      stars = [];
+      for (let i = 0; i < 200; i++) {
+        stars.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          z: Math.random() * w
+        });
+      }
     }
-  }
 
-  document.getElementById('searchBtn').addEventListener('click', searchLLaMA);
-  document.getElementById('searchInput').addEventListener('keypress', e=>{
-    if(e.key==='Enter') searchLLaMA();
-  });
-</script>
+    function animateStars() {
+      ctx.fillStyle = "#111";
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = "#fff";
+      for (let i = 0; i < stars.length; i++) {
+        let star = stars[i];
+        star.z -= 2;
+        if (star.z <= 0) star.z = w;
+        let k = 128.0 / star.z;
+        let x = star.x * k + w / 2;
+        let y = star.y * k + h / 2;
+        if (x >= 0 && x <= w && y >= 0 && y <= h) {
+          let size = (1 - star.z / w) * 3;
+          ctx.fillRect(x, y, size, size);
+        }
+      }
+      requestAnimationFrame(animateStars);
+    }
+
+    window.addEventListener("resize", initStars);
+    initStars();
+    animateStars();
+
+    /* ===== WIKIPEDIA SEARCH ===== */
+    document.getElementById("searchBtn").addEventListener("click", searchWiki);
+
+    async function searchWiki() {
+      const query = document.getElementById("searchInput").value.trim();
+      if (!query) return;
+
+      const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = data.query.search.map(item => `
+        <div class="resultItem">
+          <a href="https://en.wikipedia.org/wiki/${encodeURIComponent(item.title)}" target="_blank">
+            ${item.title}
+          </a>
+          <p>${item.snippet}...</p>
+        </div>
+      `).join("");
+    }
+
+    /* ===== NEWS SYSTEM ===== */
+    const newsItems = [
+      {
+        title: "✨ New Futuristic Design!",
+        content: "We redesigned MyWeb with a sleek dark mode and animated starfield background.",
+        date: "2025-09-19"
+      },
+      {
+        title: "🔍 Wikipedia Search Added",
+        content: "Now you can search Wikipedia directly from MyWeb!",
+        date: "2025-09-18"
+      },
+      {
+        title: "🚀 Launch Day!",
+        content: "Welcome to the very first version of MyWeb, hosted on GitHub Pages.",
+        date: "2025-09-15"
+      }
+    ];
+
+    function renderNews() {
+      const newsList = document.getElementById("newsList");
+      newsList.innerHTML = newsItems.map(item => `
+        <li class="newsItem">
+          <button class="newsButton">${item.title} <span class="date">(${item.date})</span></button>
+          <div class="newsContent hidden">${item.content}</div>
+        </li>
+      `).join("");
+
+      document.querySelectorAll(".newsButton").forEach((btn, i) => {
+        btn.addEventListener("click", () => {
+          const content = btn.nextElementSibling;
+          content.classList.toggle("hidden");
+        });
+      });
+    }
+
+    document.getElementById("searchTab").addEventListener("click", () => {
+      document.getElementById("results").classList.remove("hidden");
+      document.getElementById("newsResults").classList.add("hidden");
+    });
+
+    document.getElementById("newsTab").addEventListener("click", () => {
+      document.getElementById("results").classList.add("hidden");
+      document.getElementById("newsResults").classList.remove("hidden");
+      renderNews();
+    });
+
+    /* ===== LATEST NEWS FOOTER ===== */
+    function showLatestNews() {
+      const latest = newsItems[0]; // newest is first
+      document.getElementById("latestNewsText").textContent = latest.title + " - " + latest.content;
+    }
+
+    showLatestNews();
+  </script>
 </body>
 </html>
-
-
