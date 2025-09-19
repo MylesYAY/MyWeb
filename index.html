@@ -2,255 +2,238 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MyWeb</title>
+  <link rel="icon" href="favicon.png" type="image/png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    body {
+    /* Reset */
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
       font-family: 'Inter', sans-serif;
-      background: #111;
-      color: #fff;
-      overflow-x: hidden;
     }
 
-    /* ==== Starfield Background ==== */
-    canvas#starfield {
+    body {
+      background: #0d0d0d;
+      color: white;
+      overflow-x: hidden;
+      text-align: center;
+    }
+
+    /* Starfield background */
+    #starfield {
       position: fixed;
       top: 0;
       left: 0;
+      width: 100vw;
+      height: 100vh;
       z-index: -1;
+      background: black;
     }
 
-    /* ==== Card Navigation Bar ==== */
-    .card-nav {
+    /* Navbar */
+    nav {
       display: flex;
       justify-content: center;
-      gap: 1rem;
+      gap: 2rem;
       padding: 1rem;
-      background: rgba(20, 20, 20, 0.85);
-      backdrop-filter: blur(6px);
-      position: sticky;
-      top: 0;
-      z-index: 10;
+      background: rgba(20, 20, 20, 0.9);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .card-nav a {
+    nav a {
+      color: white;
       text-decoration: none;
-      padding: 0.75rem 1.25rem;
-      border-radius: 12px;
-      background: #1a1a1a;
-      color: #fff;
       font-weight: 600;
-      transition: all 0.25s ease;
-      box-shadow: 0 0 10px rgba(0, 200, 255, 0.25);
+      transition: color 0.3s;
     }
 
-    .card-nav a:hover {
-      background: #0ff;
-      color: #000;
-      box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+    nav a:hover {
+      color: #00d4ff;
     }
 
-    /* ==== Centered Content ==== */
-    .container {
+    /* Main section */
+    main {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-top: 10vh;
-      text-align: center;
-      padding: 0 1rem;
+      justify-content: center;
+      min-height: 70vh;
+      padding: 2rem;
     }
 
     h1 {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      color: #0ff;
-      text-shadow: 0 0 12px rgba(0, 255, 255, 0.5);
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
     }
 
-    .search-box {
+    .search-bar {
       display: flex;
       width: 100%;
       max-width: 600px;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 2px solid rgba(0, 255, 255, 0.4);
     }
 
-    .search-box input {
+    .search-bar input {
       flex: 1;
-      padding: 0.75rem;
+      padding: 0.8rem;
       border: none;
-      outline: none;
+      border-radius: 8px 0 0 8px;
       font-size: 1rem;
-      background: #222;
-      color: #fff;
     }
 
-    .search-box button {
-      padding: 0.75rem 1.5rem;
+    .search-bar button {
+      padding: 0.8rem 1.5rem;
       border: none;
+      background: #00d4ff;
+      color: black;
+      font-weight: bold;
+      border-radius: 0 8px 8px 0;
       cursor: pointer;
-      font-weight: 600;
-      background: #0ff;
-      color: #000;
-      transition: background 0.25s ease;
+      transition: background 0.3s;
     }
 
-    .search-box button:hover {
-      background: #00cccc;
+    .search-bar button:hover {
+      background: #00aacc;
     }
 
-    /* ==== Search Results ==== */
+    /* Results */
     #results {
       margin-top: 2rem;
-      width: 100%;
       max-width: 800px;
       text-align: left;
     }
 
-    .result {
-      padding: 1rem;
-      margin: 0.5rem 0;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      transition: background 0.25s ease;
-    }
-
-    .result:hover {
-      background: rgba(0, 255, 255, 0.1);
-    }
-
-    .result a {
-      color: #0ff;
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    /* ==== Latest News Section ==== */
-    .news-section {
-      margin: 4rem auto 2rem auto;
-      max-width: 800px;
-      padding: 1.5rem;
-      background: rgba(30, 30, 30, 0.9);
+    /* News section */
+    #news {
+      margin-top: 3rem;
+      padding: 2rem;
+      background: rgba(30, 30, 30, 0.8);
       border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0, 200, 255, 0.25);
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    .news-section h2 {
-      color: #0ff;
+    #news h2 {
       margin-bottom: 1rem;
+      font-size: 1.8rem;
     }
 
     .news-item {
-      margin: 0.5rem 0;
-      padding: 0.75rem;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(50, 50, 50, 0.8);
+      margin-bottom: 1rem;
+      padding: 1rem;
       border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
     }
 
     .news-item:hover {
-      background: rgba(0, 255, 255, 0.1);
+      background: rgba(70, 70, 70, 0.9);
     }
 
-    .news-item a {
-      color: #fff;
-      text-decoration: none;
-      font-weight: 500;
+    .news-desc {
+      display: none;
+      margin-top: 0.5rem;
+      color: #ccc;
+      font-size: 0.95rem;
     }
   </style>
 </head>
 <body>
   <canvas id="starfield"></canvas>
 
-  <!-- Card Navigation -->
-  <nav class="card-nav">
-    <a href="#">Home</a>
-    <a href="#">About</a>
-    <a href="#">Docs</a>
-    <a href="#">Contact</a>
+  <nav>
+    <a href="#search">Search</a>
+    <a href="#news">Website News</a>
   </nav>
 
-  <!-- Main Container -->
-  <div class="container">
+  <main id="search">
     <h1>Welcome to MyWeb</h1>
-    <div class="search-box">
-      <input id="searchInput" type="text" placeholder="Search Wikipedia..." />
+    <div class="search-bar">
+      <input type="text" id="query" placeholder="Search Wikipedia...">
       <button onclick="search()">Search</button>
     </div>
     <div id="results"></div>
-  </div>
+  </main>
 
-  <!-- Latest News -->
-  <div class="news-section">
+  <section id="news">
     <h2>Latest News</h2>
-    <div class="news-item"><a href="#">🚀 MyWeb launched with futuristic design!</a></div>
-    <div class="news-item"><a href="#">✨ Starfield background added.</a></div>
-    <div class="news-item"><a href="#">📰 Latest News section is live!</a></div>
-  </div>
+    <div class="news-item" onclick="toggleNews(this)">
+      🚀 MyWeb Launched!
+      <div class="news-desc">The very first version of MyWeb is live with a clean futuristic design.</div>
+    </div>
+    <div class="news-item" onclick="toggleNews(this)">
+      🌌 Starfield Background Added
+      <div class="news-desc">Enjoy the animated starfield background for a spacey futuristic vibe!</div>
+    </div>
+    <div class="news-item" onclick="toggleNews(this)">
+      🔍 Wikipedia Search Online
+      <div class="news-desc">You can now search Wikipedia directly from MyWeb.</div>
+    </div>
+  </section>
 
   <script>
-    /* === Wikipedia Search === */
+    /* Wikipedia Search */
     async function search() {
-      const query = document.getElementById("searchInput").value;
+      const query = document.getElementById("query").value;
       const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json&origin=*`;
 
-      const response = await fetch(url);
-      const data = await response.json();
-      const resultsDiv = document.getElementById("results");
-      resultsDiv.innerHTML = "";
+      const res = await fetch(url);
+      const data = await res.json();
 
-      if (data.query && data.query.search) {
-        data.query.search.forEach(item => {
-          const result = document.createElement("div");
-          result.className = "result";
-          result.innerHTML = `<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(item.title)}" target="_blank">${item.title}</a><p>${item.snippet}...</p>`;
-          resultsDiv.appendChild(result);
-        });
-      }
+      const results = document.getElementById("results");
+      results.innerHTML = "";
+
+      data.query.search.forEach(item => {
+        const el = document.createElement("div");
+        el.innerHTML = `<h3>${item.title}</h3><p>${item.snippet}...</p>`;
+        results.appendChild(el);
+      });
     }
 
-    /* === Starfield Background === */
-    const canvas = document.getElementById("starfield");
-    const ctx = canvas.getContext("2d");
+    /* Toggle News Descriptions */
+    function toggleNews(el) {
+      const desc = el.querySelector(".news-desc");
+      desc.style.display = desc.style.display === "block" ? "none" : "block";
+    }
+
+    /* Starfield animation */
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
     let stars = [];
 
-    function resizeCanvas() {
+    function resize() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      stars = Array.from({length: 150}, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 2,
+        speed: Math.random() * 0.5 + 0.2
+      }));
     }
+    window.addEventListener('resize', resize);
+    resize();
 
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
-
-    function createStars() {
-      stars = [];
-      for (let i = 0; i < 150; i++) {
-        stars.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          size: Math.random() * 2,
-          speed: Math.random() * 0.5 + 0.2
-        });
-      }
-    }
-
-    function drawStars() {
+    function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "white";
       stars.forEach(star => {
         ctx.beginPath();
-        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.arc(star.x, star.y, star.size, 0, 2 * Math.PI);
         ctx.fill();
         star.y += star.speed;
-        if (star.y > canvas.height) star.y = 0;
+        if (star.y > canvas.height) {
+          star.y = 0;
+          star.x = Math.random() * canvas.width;
+        }
       });
-      requestAnimationFrame(drawStars);
+      requestAnimationFrame(animate);
     }
-
-    createStars();
-    drawStars();
+    animate();
   </script>
 </body>
 </html>
