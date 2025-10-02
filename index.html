@@ -1,116 +1,589 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MyWeb - Search</title>
-  <link rel="icon" href="favicon.png" type="image/png">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MyWeb — Halloween</title>
+
+  <!-- Inter font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-    body { background: #0d0d0d; color: white; text-align: center; overflow-x: hidden; }
-    #starfield { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
+    :root{
+      --bg:#080608;
+      --panel: rgba(255,255,255,0.03);
+      --accent:#ff7a00; /* deep orange */
+      --muted:#bfbfbf;
+      --fog-color: rgba(20,10,5,0.75);
+    }
 
-    nav { display: flex; justify-content: center; gap: 2rem; padding: 1rem;
-          background: rgba(20,20,20,0.9); border-bottom: 1px solid rgba(255,255,255,0.1);}
-    nav a { color: white; text-decoration: none; font-weight: 600; transition: color 0.3s; }
-    nav a:hover { color: #00d4ff; }
+    html,body{
+      height:100%;
+      margin:0;
+      font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: var(--bg);
+      color: #fff;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      overflow-x:hidden;
+      cursor: default;
+    }
 
-    main { display: flex; flex-direction: column; align-items: center; justify-content: center;
-           min-height: 70vh; padding: 2rem; }
-    h1 { font-size: 2.5rem; margin-bottom: 1.5rem; }
+    /* Canvas (stars) sits behind everything */
+    canvas#stars {
+      position: fixed;
+      inset: 0;
+      width:100%;
+      height:100%;
+      z-index:-3;
+      display:block;
+    }
 
-    .search-bar { display: flex; width: 100%; max-width: 600px; }
-    .search-bar input { flex: 1; padding: 0.8rem; border: none; border-radius: 8px 0 0 8px; font-size: 1rem; }
-    .search-bar button { padding: 0.8rem 1.5rem; border: none; background: #00d4ff; color: black;
-                         font-weight: bold; border-radius: 0 8px 8px 0; cursor: pointer;
-                         transition: background 0.3s; }
-    .search-bar button:hover { background: #00aacc; }
+    /* Fog layer */
+    .fog {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: -20vh;
+      height: 40vh;
+      z-index: -1;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 0%, var(--fog-color) 40%, rgba(0,0,0,0.9) 100%);
+      opacity: 0.9;
+      transform: translateY(40px);
+      animation: fogDrift 10s ease-in-out infinite alternate;
+      filter: blur(18px) contrast(0.9) saturate(0.9);
+    }
+    @keyframes fogDrift {
+      from { transform: translateY(40px) scaleX(1); opacity:0.82; }
+      to   { transform: translateY(-20px) scaleX(1.02); opacity:1; }
+    }
 
-    #results { margin-top: 2rem; max-width: 800px; text-align: left; display: flex; flex-direction: column; gap: 1rem; }
-    .result-card { background: rgba(50,50,50,0.8); padding: 1rem; border-radius: 8px; transition: background 0.3s; }
-    .result-card:hover { background: rgba(70,70,70,0.9); }
-    .result-card h3 { margin-bottom: 0.3rem; }
-    .result-card a { color: #00d4ff; font-weight: 600; text-decoration: none; }
-    .result-card a:hover { text-decoration: underline; }
-    .result-card p { color: #ccc; }
+    /* Page centering */
+    .page {
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      padding:24px;
+      box-sizing:border-box;
+      position:relative;
+      z-index:2;
+      text-align:center;
+    }
+
+    /* Nav (Search + Website News) */
+    nav {
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:center;
+      margin-bottom:18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding:10px 14px;
+      border-radius:12px;
+      border: 1px solid rgba(255,255,255,0.02);
+      box-shadow: 0 6px 22px rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+    }
+    .nav-btn {
+      padding:10px 16px;
+      border-radius:10px;
+      background:transparent;
+      color:#fff;
+      border:1px solid rgba(255,255,255,0.04);
+      text-decoration:none;
+      font-weight:600;
+      cursor:pointer;
+      transition: all .18s ease;
+    }
+    .nav-btn.active {
+      background: rgba(255,255,255,0.02);
+      box-shadow: 0 6px 22px rgba(255,120,0,0.06);
+      color: var(--accent);
+      border-color: rgba(255,120,0,0.18);
+    }
+
+    /* Center card */
+    .center-card {
+      width:100%;
+      max-width:920px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:18px;
+      padding:28px;
+      border-radius:14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.006));
+      box-shadow: 0 10px 50px rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+    }
+
+    h1 {
+      margin:0;
+      font-size:2.2rem;
+      color:var(--accent);
+      text-shadow: 0 0 16px rgba(255,120,0,0.12);
+      font-weight:700;
+    }
+    p.lead {
+      margin:0;
+      color:var(--muted);
+      font-size:0.95rem;
+    }
+
+    /* Search box */
+    .search-box {
+      display:flex;
+      width:100%;
+      max-width:720px;
+      border-radius:12px;
+      overflow:hidden;
+      border: 1px solid rgba(255,120,0,0.08);
+      background: rgba(255,255,255,0.01);
+    }
+    .search-box input[type="text"]{
+      flex:1;
+      padding:14px 16px;
+      border:0;
+      outline: none;
+      font-size:1rem;
+      background:transparent;
+      color: #fff;
+    }
+    .search-box button {
+      padding: 0 18px;
+      border:0;
+      background: var(--accent);
+      color:#080608;
+      font-weight:700;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease;
+      min-width:110px;
+      position:relative;
+      overflow:visible;
+    }
+    /* hover 'drip' effect (subtle) */
+    .search-box button:hover {
+      transform:translateY(-3px);
+      background:#ff8f2b;
+      box-shadow: 0 8px 26px rgba(255,120,0,0.08);
+    }
+    .search-box .drip {
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:-12px;
+      width:6px;
+      height:12px;
+      border-radius:12px;
+      background: rgba(120,0,0,0.9);
+      opacity:0;
+      transition: opacity .18s, transform .18s;
+    }
+    .search-box button:hover .drip { opacity:1; transform: translateX(-50%) translateY(0); }
+
+    /* Results container */
+    #results {
+      width:100%;
+      max-width:820px;
+      margin-top:8px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+    }
+    .result-card{
+      width:100%;
+      text-align:left;
+      padding:14px;
+      border-radius:10px;
+      background: var(--panel);
+      color:#fff;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+      transition: transform .12s ease, box-shadow .12s ease;
+      border:1px solid rgba(255,255,255,0.02);
+    }
+    .result-card:hover{ transform: translateY(-6px); box-shadow: 0 14px 36px rgba(0,0,0,0.6); }
+    .result-card h3 { margin:0 0 6px 0; font-size:1.05rem; color:var(--accent); }
+    .result-card a { color:var(--accent); font-weight:700; text-decoration:none; }
+    .result-card p { margin:0; color:#d7d7d7; font-size:0.95rem; }
+
+    /* News area */
+    .news-wrapper {
+      width:100%;
+      max-width:820px;
+      margin-top:12px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+    }
+    .electric-border {
+      width:100%;
+      padding:14px;
+      border-radius:12px;
+      position:relative;
+      isolation:isolate;
+      --electric-border-color: #ffb37a;
+      --eb-border-width: 2px;
+      background: rgba(15,15,15,0.8);
+      border: 1px solid rgba(255,120,0,0.05);
+    }
+    .news-list { width:100%; display:flex; flex-direction:column; gap:8px; margin:0; padding:0; list-style:none; }
+    .newsItem { display:flex; flex-direction:column; gap:8px; padding:10px; border-radius:8px; background: rgba(255,255,255,0.01); cursor:pointer; }
+    .newsItemTitle { color:var(--accent); font-weight:700; text-align:left; }
+    .newsContent { display:none; color:#d9d9d9; font-size:0.95rem; text-align:left; padding-left:6px; }
+
+    .latest {
+      width:100%;
+      max-width:820px;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:10px;
+      background: rgba(20,20,20,0.85);
+      border-top:3px solid rgba(255,120,0,0.12);
+      color:#ddd;
+      font-size:0.95rem;
+    }
+    .latest strong { color:var(--accent); }
+
+    /* Cobwebs - SVG overlays in corners, slight sway on hover */
+    .cobweb {
+      position: fixed;
+      width: 160px;
+      height: 160px;
+      opacity: 0.85;
+      z-index: 3;
+      pointer-events: none;
+      transform-origin: center;
+      transition: transform 2.5s ease;
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.6));
+    }
+    .cobweb:hover { transform: rotate(-3deg) scale(1.02); pointer-events:auto; } /* hovering small sway */
+    .cobweb.top-left { left: 8px; top: 8px; transform: rotate(0deg); }
+    .cobweb.top-right { right: 8px; top: 8px; transform: scaleX(-1); }
+    .cobweb.bottom-left { left: 8px; bottom: 8px; transform: rotate(180deg); }
+    .cobweb.bottom-right { right: 8px; bottom: 8px; transform: rotate(180deg) scaleX(-1); }
+
+    /* Mouse trail particles */
+    .trail {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      background: rgba(255,140,30,0.28);
+      border-radius:50%;
+      pointer-events:none;
+      transform: translate(-50%,-50%);
+      animation: trailFade 0.9s forwards;
+      z-index: 9999;
+      mix-blend-mode: screen;
+      filter: blur(1.2px);
+    }
+    @keyframes trailFade { to { transform: translate(-50%,-50%) scale(0.3); opacity:0; } }
+
+    /* small screens */
+    @media (max-width:720px){
+      .center-card{ padding:18px; }
+      h1 { font-size:1.5rem; }
+      .search-box button { min-width:86px; }
+      .cobweb { width: 120px; height:120px; }
+    }
   </style>
 </head>
 <body>
-  <canvas id="starfield"></canvas>
+  <!-- Orange ember starfield -->
+  <canvas id="stars" aria-hidden="true"></canvas>
 
-  <nav>
-    <a href="index.html">Search</a>
-    <a href="news.html">Website News</a>
-  </nav>
+  <!-- Fog at bottom -->
+  <div class="fog" aria-hidden="true"></div>
 
-  <main>
-    <h1>MyWeb</h1>
-    <div class="search-bar">
-      <input type="text" id="query" placeholder="Enter search term...">
-      <button onclick="search()">Search</button>
+  <!-- animated cobwebs (SVG inline) -->
+  <div class="cobweb top-left" aria-hidden="true">
+    <!-- simple web SVG; slight animation via CSS hover -->
+    <svg viewBox="0 0 120 120" width="160" height="160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g stroke="rgba(255,190,120,0.9)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="60" cy="60" r="46" stroke-opacity="0.55"/>
+        <path d="M60 14 L60 106" stroke-opacity="0.6"/>
+        <path d="M14 60 L106 60" stroke-opacity="0.6"/>
+        <path d="M26 26 L94 94" stroke-opacity="0.45"/>
+        <path d="M94 26 L26 94" stroke-opacity="0.45"/>
+        <path d="M60 18 C78 28 88 40 94 60 C88 80 78 92 60 102" stroke-opacity="0.35"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="cobweb top-right" aria-hidden="true">
+    <svg viewBox="0 0 120 120" width="160" height="160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g stroke="rgba(255,190,120,0.9)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="60" cy="60" r="46" stroke-opacity="0.55"/>
+        <path d="M60 14 L60 106" stroke-opacity="0.6"/>
+        <path d="M14 60 L106 60" stroke-opacity="0.6"/>
+        <path d="M26 26 L94 94" stroke-opacity="0.45"/>
+        <path d="M94 26 L26 94" stroke-opacity="0.45"/>
+        <path d="M60 18 C78 28 88 40 94 60 C88 80 78 92 60 102" stroke-opacity="0.35"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="cobweb bottom-left" aria-hidden="true">
+    <svg viewBox="0 0 120 120" width="160" height="160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g stroke="rgba(255,190,120,0.9)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="60" cy="60" r="46" stroke-opacity="0.55"/>
+        <path d="M60 14 L60 106" stroke-opacity="0.6"/>
+        <path d="M14 60 L106 60" stroke-opacity="0.6"/>
+        <path d="M26 26 L94 94" stroke-opacity="0.45"/>
+        <path d="M94 26 L26 94" stroke-opacity="0.45"/>
+        <path d="M60 18 C78 28 88 40 94 60 C88 80 78 92 60 102" stroke-opacity="0.35"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="cobweb bottom-right" aria-hidden="true">
+    <svg viewBox="0 0 120 120" width="160" height="160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g stroke="rgba(255,190,120,0.9)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="60" cy="60" r="46" stroke-opacity="0.55"/>
+        <path d="M60 14 L60 106" stroke-opacity="0.6"/>
+        <path d="M14 60 L106 60" stroke-opacity="0.6"/>
+        <path d="M26 26 L94 94" stroke-opacity="0.45"/>
+        <path d="M94 26 L26 94" stroke-opacity="0.45"/>
+        <path d="M60 18 C78 28 88 40 94 60 C88 80 78 92 60 102" stroke-opacity="0.35"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Main page -->
+  <div class="page" role="main">
+    <nav aria-label="main navigation">
+      <button class="nav-btn active" id="tabSearch">Search</button>
+      <button class="nav-btn" id="tabNews">Website News</button>
+    </nav>
+
+    <div class="center-card" id="panelSearch" role="region" aria-label="Search panel">
+      <h1>MyWeb</h1>
+      <p class="lead">Creepy edition — search Wikipedia from here</p>
+
+      <div class="search-box" role="search">
+        <input id="q" type="text" placeholder="Enter search term..." aria-label="Search input">
+        <button id="goBtn" aria-label="Search button">Search
+          <span class="drip" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <div id="results" aria-live="polite"></div>
     </div>
-    <div id="results"></div>
-  </main>
+
+    <div class="news-wrapper" id="panelNews" role="region" aria-label="News panel" style="display:none;">
+      <div class="electric-border">
+        <h2 style="margin:0 0 10px 0; color:var(--accent)">Website News</h2>
+        <ul id="newsList" class="news-list" aria-live="polite"></ul>
+      </div>
+
+      <div class="latest" id="latest">Latest: <strong id="latestText"></strong></div>
+    </div>
+  </div>
 
   <script>
-    /* Wikipedia Search */
-    async function search() {
-      const query = document.getElementById("query").value;
-      if (!query) return;
-
-      const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json&origin=*`;
-
-      const res = await fetch(url);
-      const data = await res.json();
-
-      const results = document.getElementById("results");
-      results.innerHTML = "";
-
-      data.query.search.forEach(item => {
-        const link = `https://en.wikipedia.org/?curid=${item.pageid}`;
-        const el = document.createElement("div");
-        el.className = "result-card";
-        el.innerHTML = `
-          <h3><a href="${link}" target="_blank" rel="noopener noreferrer">${item.title}</a></h3>
-          <p>${item.snippet}...</p>
-        `;
-        results.appendChild(el);
-      });
-    }
-
-    /* Starfield animation */
-    const canvas = document.getElementById('starfield');
+    /* ================= STARS (orange embers) ================= */
+    const canvas = document.getElementById('stars');
     const ctx = canvas.getContext('2d');
-    let stars = [];
-    function resize() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      stars = Array.from({length: 150}, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        size: Math.random() * 2,
-        speed: Math.random() * 0.5 + 0.2
-      }));
+    let W = 0, H = 0, DPR = Math.max(1, window.devicePixelRatio || 1);
+    let embers = [];
+
+    function resizeCanvas(){
+      DPR = Math.max(1, window.devicePixelRatio || 1);
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      canvas.width = Math.floor(W * DPR);
+      canvas.height = Math.floor(H * DPR);
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      initEmbers();
     }
-    window.addEventListener('resize', resize);
-    resize();
-    function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "white";
-      stars.forEach(star => {
+
+    function initEmbers(){
+      embers = [];
+      const count = Math.round((W * H) / 12000);
+      for(let i=0;i<count;i++){
+        embers.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: 0.6 + Math.random() * 1.8,
+          vy: 0.05 + Math.random() * 0.45,
+          alpha: 0.2 + Math.random() * 0.9,
+          tw: 0.5 + Math.random()*1.5
+        });
+      }
+    }
+
+    function drawEmbers(t){
+      ctx.clearRect(0,0,W,H);
+      for(let e of embers){
+        // subtle flicker
+        const flick = Math.sin(t/1000 * (1/e.tw)) * 0.4 + 0.6;
+        ctx.globalAlpha = Math.max(0.05, Math.min(1, e.alpha * flick));
+        // orange glow
+        const grad = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.r*6);
+        grad.addColorStop(0, 'rgba(255,140,40,0.95)');
+        grad.addColorStop(0.2, 'rgba(255,110,20,0.5)');
+        grad.addColorStop(0.6, 'rgba(60,20,10,0.06)');
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.arc(star.x, star.y, star.size, 0, 2 * Math.PI);
+        ctx.arc(e.x, e.y, e.r*4, 0, Math.PI*2);
         ctx.fill();
-        star.y += star.speed;
-        if (star.y > canvas.height) {
-          star.y = 0;
-          star.x = Math.random() * canvas.width;
-        }
-      });
-      requestAnimationFrame(animate);
+
+        // move downward slowly (like embers floating)
+        e.y += e.vy;
+        e.x += Math.sin(t/2000 + e.x) * 0.12; // gentle horizontal drift
+        if(e.y > H + 10) e.y = -20 - Math.random()*50;
+        if(e.x < -20) e.x = W + 20;
+        if(e.x > W + 20) e.x = -20;
+      }
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(drawEmbers);
     }
-    animate();
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    requestAnimationFrame(drawEmbers);
+
+    /* ================= Mouse trail ================= */
+    document.addEventListener('mousemove', e => {
+      const t = document.createElement('div');
+      t.className = 'trail';
+      const size = 6 + Math.random()*10;
+      t.style.width = `${size}px`;
+      t.style.height = `${size}px`;
+      t.style.left = `${e.clientX}px`;
+      t.style.top = `${e.clientY}px`;
+      t.style.background = `rgba(255,140,40,${0.12 + Math.random()*0.28})`;
+      t.style.filter = `blur(${1 + Math.random()*4}px)`;
+      document.body.appendChild(t);
+      setTimeout(()=> t.remove(), 900);
+    });
+
+    /* ================= Tab switching ================= */
+    const tabSearch = document.getElementById('tabSearch');
+    const tabNews = document.getElementById('tabNews');
+    const panelSearch = document.getElementById('panelSearch');
+    const panelNews = document.getElementById('panelNews');
+
+    function setActiveTab(tab){
+      if(tab === 'search'){
+        tabSearch.classList.add('active');
+        tabNews.classList.remove('active');
+        panelSearch.style.display = '';
+        panelNews.style.display = 'none';
+      } else {
+        tabNews.classList.add('active');
+        tabSearch.classList.remove('active');
+        panelSearch.style.display = 'none';
+        panelNews.style.display = '';
+      }
+    }
+    tabSearch.addEventListener('click', ()=> setActiveTab('search'));
+    tabNews.addEventListener('click', ()=> setActiveTab('news'));
+
+    /* ================= Wikipedia search ================= */
+    async function doSearch(){
+      const q = document.getElementById('q').value.trim();
+      const results = document.getElementById('results');
+      if(!q){
+        results.innerHTML = `<div class="result-card">Please enter a search term.</div>`;
+        return;
+      }
+      results.innerHTML = `<div class="result-card">Loading…</div>`;
+      try {
+        const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&origin=*`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if(!data.query || !data.query.search || data.query.search.length === 0){
+          results.innerHTML = `<div class="result-card">No results found.</div>`;
+          return;
+        }
+        results.innerHTML = data.query.search.map(item => {
+          const link = `https://en.wikipedia.org/?curid=${item.pageid}`;
+          // strip potential HTML tags from snippet for safety
+          const snippet = (item.snippet || '').replace(/<\/?[^>]+(>|$)/g, "");
+          return `
+            <div class="result-card">
+              <h3><a href="${link}" target="_blank" rel="noopener noreferrer">${item.title}</a></h3>
+              <p>${snippet}…</p>
+            </div>
+          `;
+        }).join('');
+      } catch(err){
+        console.error(err);
+        results.innerHTML = `<div class="result-card">Error fetching results.</div>`;
+      }
+    }
+    document.getElementById('goBtn').addEventListener('click', doSearch);
+    document.getElementById('q').addEventListener('keydown', e => { if(e.key === 'Enter') doSearch(); });
+
+    /* ================= News system ================= */
+    const newsItems = [
+      { title: "🕸️ Creepy theme enabled", content: "Halloween-themed interface with ember stars, animated cobwebs, and creeping fog.", date: "2025-10-31" },
+      { title: "🔍 Wikipedia search", content: "Search Wikipedia directly from MyWeb. Click results to open the full article.", date: "2025-09-18" },
+      { title: "🚀 Launch", content: "MyWeb initial launch — baseline features deployed.", date: "2025-09-15" }
+    ];
+
+    function renderNews(){
+      const list = document.getElementById('newsList');
+      list.innerHTML = newsItems.map((it, idx) => `
+        <li class="newsItem" data-idx="${idx}">
+          <div class="newsItemTitle">${it.title} <span style="opacity:0.6; font-weight:400; margin-left:8px; font-size:0.9rem">(${it.date})</span></div>
+          <div class="newsContent" id="news-${idx}">${it.content}</div>
+        </li>
+      `).join('');
+      // attach toggles
+      document.querySelectorAll('.newsItem').forEach(el => {
+        el.addEventListener('click', () => {
+          const idx = el.getAttribute('data-idx');
+          const content = document.getElementById('news-' + idx);
+          if(!content) return;
+          content.style.display = content.style.display === 'block' ? 'none' : 'block';
+        });
+      });
+    }
+    renderNews();
+
+    // latest text
+    function showLatest(){
+      if(newsItems.length){
+        const latest = newsItems[0];
+        document.getElementById('latestText').textContent = `${latest.title} — ${latest.content}`;
+      } else {
+        document.getElementById('latestText').textContent = 'No news yet.';
+      }
+    }
+    showLatest();
+
+    /* initialize size-dependent things */
+    window.addEventListener('load', () => {
+      resizeCanvas();
+      initEmbers();
+    });
+
+    /* helper: ensure canvas responds when resizing */
+    let resizeTimer;
+    function resizeCanvas(){
+      if(typeof resizeTimer !== 'undefined') clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(()=> {
+        DPR = Math.max(1, window.devicePixelRatio || 1);
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+        canvas.width = Math.floor(W * DPR);
+        canvas.height = Math.floor(H * DPR);
+        ctx.setTransform(DPR,0,0,DPR,0,0);
+        initEmbers();
+      }, 80);
+    }
+    window.addEventListener('resize', resizeCanvas);
   </script>
 </body>
 </html>
