@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-    body { background: #0d0d0d; color: white; text-align: center; overflow-x: hidden; }
+    body { background: #0d0d0d; color: white; text-align: center; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
     #starfield { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
 
     nav { display: flex; justify-content: center; gap: 2rem; padding: 1rem;
@@ -16,7 +16,7 @@
     nav a { color: white; text-decoration: none; font-weight: 600; transition: color 0.3s; }
     nav a:hover { color: #00d4ff; }
 
-    main { display: flex; flex-direction: column; align-items: center; justify-content: center;
+    main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
            min-height: 70vh; padding: 2rem; }
     h1 { font-size: 2.5rem; margin-bottom: 1.5rem; }
 
@@ -34,6 +34,10 @@
     .result-card a { color: #00d4ff; font-weight: 600; text-decoration: none; }
     .result-card a:hover { text-decoration: underline; }
     .result-card p { color: #ccc; }
+
+    footer { background: rgba(20,20,20,0.9); border-top: 1px solid rgba(255,255,255,0.1); padding: 1rem; margin-top: auto; }
+    footer a { color: #00d4ff; text-decoration: none; margin: 0 1rem; font-weight: 600; transition: color 0.3s; }
+    footer a:hover { color: #00aacc; }
   </style>
 </head>
 <body>
@@ -53,8 +57,13 @@
     <div id="results"></div>
   </main>
 
+  <footer>
+    <a href="videos.html">Video Search</a>
+    <a href="tos.html">Terms of Service</a>
+    <a href="safety.html">Online Safety</a>
+  </footer>
+
   <script>
-    /* Wikipedia Search */
     async function search() {
       const query = document.getElementById("query").value;
       if (!query) return;
