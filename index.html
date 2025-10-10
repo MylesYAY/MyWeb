@@ -1,105 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MyWeb - Search</title>
-  <link rel="icon" href="favicon.png" type="image/png">
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Enter Code</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <canvas id="starfield"></canvas>
+<canvas id="starfield" data-color="limegreen"></canvas>
 
-  <nav>
-    <a href="index.html">Search</a>
-  </nav>
+<nav>
+  <a href="search.html">Search</a>
+</nav>
 
-  <main>
-    <h1>MyWeb</h1>
+<main>
+<h1>Enter Code</h1>
+<div style="margin-top:1rem;">
+  <input id="codeInput" type="password" placeholder="Enter code..." style="padding:0.75rem;font-size:1rem;width:200px;">
+  <button id="codeBtn" style="padding:0.75rem 1rem;">Go</button>
+</div>
+<p id="codeMsg" style="color:#ff6666;margin-top:0.75rem;"></p>
+</main>
 
-    <div class="search-bar" role="search" aria-label="Site search">
-      <input id="query" type="text" placeholder="Enter search term..." aria-label="Search input" />
-      <button id="searchBtn" type="button">Search</button>
-    </div>
+<script src="starfield.js"></script>
+<script>
+const codes = {
+  "home":"search.html",
+  "search":"search.html",
+  "smile":"secret-code/sm1le.html"
+};
 
-    <div id="results" aria-live="polite"></div>
-  </main>
+const input = document.getElementById('codeInput');
+const btn = document.getElementById('codeBtn');
+const msg = document.getElementById('codeMsg');
 
-  <footer>
-    <a href="tos.html">Terms of Service</a>
-    <span style="color:rgba(255,255,255,0.35)">|</span>
-    <a href="safety.html">Online Safety</a>
-  </footer>
+function checkCode() {
+  const val = input.value.trim().toLowerCase();
+  if(codes[val]) {
+    window.location.href = codes[val];
+  } else {
+    msg.textContent = "Invalid code!";
+    input.value = "";
+  }
+}
 
-  <script src="starfield.js"></script>
-  <script>
-    // Apps Script logger URL (from you)
-    const LOG_URL = "https://script.google.com/macros/s/AKfycbzqoQvH5bN6OTQey8iMcrE8fPu10OGvdDlzzfS2CR7BMrxJvOlPEhv_M6-Y1QuRtPZ46g/exec";
-
-    async function logSearch(query) {
-      try {
-        await fetch(LOG_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query })
-        });
-      } catch (err) {
-        // logging failures shouldn't block the search; optionally show console message
-        console.warn("Search logging failed:", err);
-      }
-    }
-
-    async function performWikiSearch(query) {
-      const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json&origin=*`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Wikipedia search failed");
-      const data = await res.json();
-      return data.query && data.query.search ? data.query.search : [];
-    }
-
-    async function showResultsFor(query) {
-      const results = document.getElementById('results');
-      results.innerHTML = "<p style='color:#aaa'>Searching...</p>";
-      try {
-        const items = await performWikiSearch(query);
-        if (!items.length) {
-          results.innerHTML = "<p style='color:#ccc'>No results found.</p>";
-          return;
-        }
-        results.innerHTML = "";
-        items.forEach(item => {
-          const link = `https://en.wikipedia.org/?curid=${item.pageid}`;
-          const el = document.createElement('div');
-          el.className = "result-card";
-          el.innerHTML = `
-            <h3><a href="${link}" target="_blank" rel="noopener noreferrer">${item.title}</a></h3>
-            <p>${item.snippet}...</p>
-          `;
-          results.appendChild(el);
-        });
-      } catch (err) {
-        results.innerHTML = "<p style='color:#ff9999'>An error occurred while searching.</p>";
-        console.error(err);
-      }
-    }
-
-    // wire up search action
-    const input = document.getElementById('query');
-    const btn = document.getElementById('searchBtn');
-
-    async function doSearch() {
-      const q = input.value.trim();
-      if (!q) return;
-      // log first (non-blocking)
-      logSearch(q);
-      // perform wiki search and show
-      await showResultsFor(q);
-    }
-
-    btn.addEventListener('click', doSearch);
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') doSearch();
-    });
-  </script>
+btn.addEventListener('click', checkCode);
+input.addEventListener('keydown', e => { if(e.key==='Enter') checkCode(); });
+</script>
 </body>
 </html>
