@@ -5,6 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Search — MyWeb</title>
 <link rel="stylesheet" href="style.css">
+<style>
+/* Ensure starfield is behind everything */
+#starfield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+}
+
+/* Main content above starfield */
+main {
+    position: relative;
+    z-index: 1;
+}
+
+/* Scrollable results */
+#results {
+    overflow-y: auto;
+    max-height: 70vh;
+}
+</style>
 </head>
 <body>
 
@@ -84,9 +107,6 @@
                                     <p style="margin:0;">${item.snippet}...</p>`;
                     resultsDiv.appendChild(el);
                 });
-                // Enable scrolling
-                resultsDiv.style.overflowY='auto';
-                resultsDiv.style.maxHeight='70vh';
             });
         });
     });
