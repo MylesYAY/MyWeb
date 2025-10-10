@@ -1,8 +1,10 @@
-/* starfield.js - shared starfield animation for every page */
 (function () {
   const canvas = document.getElementById('starfield');
-  if (!canvas) return; // graceful if page missing canvas
+  if (!canvas) return;
   const ctx = canvas.getContext('2d');
+
+  // Default color is white
+  const starColor = canvas.dataset.color || "white";
 
   let stars = [];
   function resetStars() {
@@ -26,9 +28,8 @@
 
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "white";
-    for (let i = 0; i < stars.length; i++) {
-      const s = stars[i];
+    ctx.fillStyle = starColor;
+    for (let s of stars) {
       const alpha = 0.6 + Math.sin((Date.now() / 500) + s.twinkle) * 0.4;
       ctx.globalAlpha = Math.max(0.2, Math.min(1, alpha));
       ctx.beginPath();
