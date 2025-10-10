@@ -1,51 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Enter Code</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MyWeb</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Code-page-specific styles */
+    body { overflow: hidden; } /* let buttons float freely */
+    .stage {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      pointer-events: none; /* allow clicks to fall to children */
+    }
+
+    .code-btn {
+      position: absolute;
+      min-width: 300px;
+      min-height: 90px;
+      padding: 14px;
+      background: #000; /* black surface */
+      border: 2px solid rgba(0,212,255,0.06);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      border-radius: 10px;
+      cursor: grab;
+      pointer-events: auto;
+      transition: transform 200ms cubic-bezier(.2,.9,.2,1), box-shadow 120ms;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: center;
+      user-select: none;
+      overflow: hidden;
+    }
+
+    .code-btn:active { cursor: grabbing; }
+
+    /* code text */
+    .code-text {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+      color: #7CFC00; /* green text */
+      font-size: 14px;
+      line-height: 1.25;
+      white-space: pre;
+      text-align: left;
+      padding: 6px 8px;
+      width: 100%;
+    }
+
+    .code-btn.hovered {
+      transform: scale(1.12);
+      z-index: 999;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+    }
+
+    .typing {
+      color: #a2ff7a;
+    }
+
+    /* subtle glare line */
+    .code-btn::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 2px;
+      width: 100%;
+      background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      pointer-events: none;
+    }
+
+    /* make nav minimal and styled as your black buttons */
+    nav {
+      display: flex;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(20,20,20,0.9);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    nav a {
+      padding: 0.5rem 1rem;
+      background: #000;
+      color: #7CFC00;
+      font-family: ui-monospace, monospace;
+      font-weight: 700;
+      border-radius: 6px;
+      text-decoration: none;
+      pointer-events: auto;
+    }
+    nav a:hover { transform: scale(1.03); }
+
+    /* Responsive smaller buttons if viewport narrow */
+    @media (max-width: 640px) {
+      .code-btn { min-width: 220px; min-height: 72px; padding:10px; }
+      .code-text { font-size: 12px; }
+    }
+  </style>
 </head>
 <body>
-<canvas id="starfield" data-color="limegreen"></canvas>
+  <!-- green starfield -->
+  <canvas id="starfield" data-color="limegreen"></canvas>
 
-<nav>
-  <a href="index.html">Code Page</a>
-</nav>
+  <nav>
+    <a href="index.html">Code Page</a>
+  </nav>
 
-<main>
-<h1>Enter Code</h1>
-<div style="margin-top:1rem;">
-  <input id="codeInput" type="password" placeholder="Enter code..." style="width:200px;">
-  <button id="codeBtn">Go</button>
-</div>
-<p id="codeMsg" style="color:#ff6666;margin-top:0.75rem;"></p>
-</main>
+  <main class="stage" id="stage" aria-hidden="false">
+    <!-- Buttons created by JS -->
+  </main>
 
-<script src="starfield.js"></script>
-<script>
-const codes = {
-  "home":"search.html",
-  "search":"search.html",
-  "smile":"secret-code/sm1le.html"
-};
+  <script src="starfield.js"></script>
+  <script>
+  // ---------- CONFIG ----------
+  const TYPING_DURATION_MS = 2000; // "medium" delay
+  const BUTTONS = [
+    {
+      id: 'btn-search',
+      code: `<script>\nif (search) searchDo();\n</script>`,
+      target: 'search.html'
+    },
+    {
+      id: 'btn-notes',
+      code: `<script>\nwhile (notes) open('MyNotes');\n</script>`,
+      target: 'secret-code/sm1le.html'
+    }
+  ];
+  // ---------- /CONFIG ----------
 
-const input = document.getElementById('codeInput');
-const btn = document.getElementById('codeBtn');
-const msg = document.getElementById('codeMsg');
+  // Physics state
+  const state = {
+    items: [], // {el, x,y, vx, vy, w, h, dragging, hover, executing}
+    stageW: window.innerWidth,
+    stageH: window.innerHeight
+  };
 
-function checkCode() {
-  const val = input.value.trim().toLowerCase();
-  if(codes[val]) {
-    window.location.href = codes[val];
-  } else {
-    msg.textContent = "Invalid code!";
-    input.value = "";
+  const stage = document.getElementById('stage');
+
+  // Create buttons and initial random positions/velocities
+  function createButtons() {
+    BUTTONS.forEach((cfg, i) => {
+      const el = document.createElement('div');
+      el.className = 'code-btn';
+      el.id = cfg.id;
+      el.innerHTML = `<div class="code-text">${escapeHtml(cfg.code)}</div>`;
+      stage.appendChild(el);
+
+      const rectW = 320;
+      const rectH = 120;
+      const startX = Math.random() * (window.innerWidth - rectW - 60) + 30;
+      const startY = Math.random() * (window.innerHeight - rectH - 160) + 100;
+
+      const item = {
+        el,
+        id: cfg.id,
+        code: cfg.code,
+        target: cfg.target,
+        x: startX,
+        y: startY,
+        w: rectW,
+        h: rectH,
+        vx: (Math.random() * 2 - 1.0) * 1.6,
+        vy: (Math.random() * 2 - 1.0) * 1.2,
+        dragging: false,
+        hover: false,
+        executing: false
+      };
+
+      // apply initial size
+      el.style.width = item.w + 'px';
+      el.style.height = item.h + 'px';
+      el.style.left = item.x + 'px';
+      el.style.top = item.y + 'px';
+
+      // attach events
+      attachInteractions(item);
+      state.items.push(item);
+    });
   }
-}
 
-btn.addEventListener('click', checkCode);
-input.addEventListener('keydown', e => { if(e.key==='Enter') checkCode(); });
-</script>
-</body>
-</html>
+  // escape html for safe display
+  function escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  // Attach mouse interactions: hover, drag, click execute
+  function attachInteractions(item) {
+    const el = item.el;
+    let offsetX = 0, offsetY = 0;
+
+    el.addEventListener('mousedown', (e) => {
+      if (item.executing) return;
+      item.dragging = true;
+      offsetX = e.clientX - item.x;
+      offsetY = e.clientY - item.y;
+      el.style.transition = 'none';
+      el.style.zIndex = 1000;
+      e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!item.dragging) return;
+      item.x = e.clientX - offsetX;
+      item.y = e.clientY - offsetY;
+      item.vx = 0; item.vy = 0; // reset velocity while dragging
+      clampPosition(item);
+      applyPos(item);
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (item.dragging) {
+        item.dragging = false;
+        el.style.transition = ''; // restore
+        el.style.zIndex = '';
+        // small release velocity based on tiny random
+        item.vx = (Math.random() * 2 - 1) * 1.2;
+        item.vy = (Math.random()
