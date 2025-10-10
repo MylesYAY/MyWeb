@@ -1,72 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>MyWeb - Search</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyWeb</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<canvas id="starfield" data-color="white"></canvas>
 
-<nav>
-  <a href="index.html">Code Page</a>
-</nav>
+<canvas id="starfield"></canvas>
 
-<main>
-<h1>MyWeb Search</h1>
-<div class="search-bar">
-  <input id="query" type="text" placeholder="Enter search term...">
-  <button id="searchBtn">Search</button>
-</div>
-<div id="results"></div>
+<main style="padding:50px;">
+    <h1 style="color:#00ff00; font-family:monospace;">MyWeb Hacker Search</h1>
+
+    <div style="margin:30px 0; display:flex; gap:10px; max-width:500px;">
+        <input id="query" type="text" placeholder="Enter search term..." 
+               style="flex:1; font-family:monospace; padding:12px; background:black; color:#00ff00; border:2px solid #00ff00; border-radius:8px;">
+        <div class="code-btn" data-target="#" style="padding:12px;">&lt;script&gt; searchDo() &lt;/script&gt;<span class="last-line"></span></div>
+    </div>
+
+    <div id="results" style="margin-top:30px; display:flex; flex-direction:column; gap:10px;"></div>
 </main>
 
 <script src="starfield.js"></script>
 <script>
-async function performWikiSearch(query) {
-  const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json&origin=*`;
-  const res = await fetch(url);
-  const data = await res.json();
-  return data.query && data.query.search ? data.query.search : [];
-}
+// --- Hacker Search Page Logic ---
+(function(){
+    const TYPING_SPEED = 80;
+    const SPARKLE_COUNT = 14;
+    const FINISH_DELAY = 800;
 
-async function showResultsFor(query) {
-  const results = document.getElementById('results');
-  results.innerHTML = "<p style='color:#aaa'>Searching...</p>";
-  try {
-    const items = await performWikiSearch(query);
-    if (!items.length) {
-      results.innerHTML = "<p style='color:#ccc'>No results found.</p>";
-      return;
+    const searchBtn = document.querySelector('.code-btn');
+    const input = document.getElementById('query');
+    const resultsDiv = document.getElementById('results');
+
+    function typeAndSparkle(el, onComplete){
+        const pre = el;
+        let fullText = pre.textContent.replace(/\u00A0/g,'').trim();
+        pre.textContent='';
+        let i=0;
+        function step(){
+            if(i<=fullText.length){
+                pre.textContent = fullText.slice(0,i);
+                i++;
+                setTimeout(step,TYPING_SPEED);
+            } else {
+                sparkle(el,onComplete);
+            }
+        }
+        step();
     }
-    results.innerHTML = "";
-    items.forEach(item => {
-      const link = `https://en.wikipedia.org/?curid=${item.pageid}`;
-      const el = document.createElement('div');
-      el.className = "result-card";
-      el.innerHTML = `
-        <h3><a href="${link}" target="_blank" rel="noopener noreferrer">${item.title}</a></h3>
-        <p>${item.snippet}...</p>
-      `;
-      results.appendChild(el);
+
+    function sparkle(hostEl,onDone){
+        const container=document.createElement('div');
+        container.className='sparkle';
+        hostEl.appendChild(container);
+        const rect=hostEl.getBoundingClientRect();
+        for(let k=0;k<SPARKLE_COUNT;k++){
+            const dot=document.createElement('div');
+            dot.className='dot';
+            dot.style.left=(Math.random()*rect.width)+'px';
+            dot.style.top=(Math.random()*rect.height)+'px';
+            dot.style.animationDelay=(Math.random()*200)+'ms';
+            container.appendChild(dot);
+        }
+        setTimeout(()=>{container.remove(); if(onDone) onDone();},900);
+    }
+
+    searchBtn.addEventListener('click',()=>{
+        typeAndSparkle(searchBtn,()=>{
+            // Perform Wikipedia search
+            const query = input.value;
+            if(!query) return;
+            fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json&origin=*`)
+            .then(res=>res.json())
+            .then(data=>{
+                resultsDiv.innerHTML='';
+                data.query.search.forEach(item=>{
+                    const link=`https://en.wikipedia.org/?curid=${item.pageid}`;
+                    const el=document.createElement('div');
+                    el.style.background='black';
+                    el.style.color='#00ff00';
+                    el.style.padding='10px';
+                    el.style.border='2px solid #00ff00';
+                    el.style.borderRadius='8px';
+                    el.innerHTML=`<h3 style="margin:0;"><a href="${link}" target="_blank">${item.title}</a></h3>
+                                    <p style="margin:0;">${item.snippet}...</p>`;
+                    resultsDiv.appendChild(el);
+                });
+            });
+        });
     });
-  } catch (err) {
-    results.innerHTML = "<p style='color:#ff9999'>An error occurred while searching.</p>";
-    console.error(err);
-  }
-}
-
-const input = document.getElementById('query');
-const btn = document.getElementById('searchBtn');
-async function doSearch() {
-  const q = input.value.trim();
-  if (!q) return;
-  await showResultsFor(q);
-}
-
-btn.addEventListener('click', doSearch);
-input.addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
+})();
 </script>
 </body>
 </html>
