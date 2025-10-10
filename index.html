@@ -1,435 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MyWeb</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    /* Page-specific overrides for the code buttons */
-    .code-area { position: relative; width: 100%; height: 100vh; overflow: hidden; }
-
-    .code-btn {
-      position: absolute;
-      min-width: 320px;
-      max-width: 420px;
-      padding: 14px;
-      background: #000;
-      border-radius: 10px;
-      border: 2px solid rgba(0,0,0,0.6);
-      box-shadow: 0 8px 30px rgba(0,0,0,0.6), inset 0 -2px 0 rgba(255,255,255,0.02);
-      cursor: grab;
-      user-select: none;
-      transition: transform 180ms cubic-bezier(.2,.9,.2,1), box-shadow 160ms;
-      will-change: transform, left, top;
-      z-index: 30;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .code-btn:active { cursor: grabbing; }
-
-    /* code text look */
-    .code-btn pre {
-      margin: 0;
-      color: #00ff00; /* matrix green text */
-      font-family: "Courier New", Courier, monospace;
-      font-size: 14px;
-      line-height: 1.25;
-      white-space: pre-wrap;
-      text-align: left;
-      pointer-events: none;
-    }
-
-    /* last-line that will be typed */
-    .code-btn .last-line { color: #00ff00; display: inline-block; }
-
-    /* hover grow */
-    .code-btn.hovered {
-      transform: scale(1.14);
-      box-shadow: 0 18px 50px rgba(0,0,0,0.7);
-      z-index: 60;
-    }
-
-    /* sparkle overlay */
-    .sparkle {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      border-radius: 8px;
-      overflow: visible;
-    }
-    .sparkle .dot {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background: #00ff00;
-      border-radius: 50%;
-      opacity: 0;
-      transform: scale(0.6);
-      filter: drop-shadow(0 0 6px #00ff00);
-      animation: sparkle-pop 900ms ease-out forwards;
-    }
-    @keyframes sparkle-pop {
-      0% { opacity: 0; transform: scale(0.2); }
-      30% { opacity: 1; transform: scale(1.2); }
-      100% { opacity: 0; transform: scale(0.2); }
-    }
-
-    /* small accessibility tweak for input focus fallback */
-    #code-hint { color: rgba(255,255,255,0.35); margin-top: 12px; font-family: monospace; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Page — MyWeb</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- green starfield -->
-  <canvas id="starfield" data-color="#00ff00"></canvas>
 
-  <!-- minimal nav — only Code Page button requirement removed per last update -->
-  <nav>
-    <a href="index.html">Code Page</a>
-  </nav>
+<canvas id="starfield"></canvas>
 
-  <main class="code-area" id="codeArea" aria-label="Code buttons area">
-    <!-- Buttons are injected by JS, but adding markup for graceful fallback -->
-    <div class="code-btn" data-target="search.html" id="btn-search" style="left:80px; top:120px;">
-      <pre>
+<main class="code-area" id="codeArea">
+    <!-- Search Button -->
+    <div class="code-btn" data-target="search.html" style="left:80px; top:120px;">
+<pre>
 &lt;script&gt;
     if(search) searchDo();
 &lt;/script&gt;
-      <span class="last-line" aria-hidden="true"></span></pre>
+<span class="last-line"></span>
+</pre>
     </div>
 
-    <div class="code-btn" data-target="secret-code/sm1le.html" id="btn-notes" style="left:460px; top:260px;">
-      <pre>
+    <!-- Notes Button -->
+    <div class="code-btn" data-target="sm1le.html" style="left:460px; top:260px;">
+<pre>
 &lt;script&gt;
     while(notes) open('MyNotes');
 &lt;/script&gt;
-      <span class="last-line" aria-hidden="true"></span></pre>
+<span class="last-line"></span>
+</pre>
     </div>
+</main>
 
-    <div id="code-hint">Click a code to execute • drag to move</div>
-  </main>
-
-  <script src="starfield.js"></script>
-  <script>
-  (function () {
-    // --- Config ---
-    const TYPING_SPEED = 40; // ms per character for last-line typing
-    const FINISH_DELAY_AFTER_SPARKLE = 1000; // ms before redirect
+<script src="starfield.js"></script>
+<script>
+// --- Code Page Logic ---
+(function() {
+    const TYPING_SPEED = 80;
+    const FINISH_DELAY_AFTER_SPARKLE = 1000;
     const SPARKLE_COUNT = 14;
 
-    // Grab elements
-    const area = document.getElementById('codeArea');
     const buttons = Array.from(document.querySelectorAll('.code-btn'));
 
-    // Initialization: ensure each button has structured lines and a 'lastLine' element
-    buttons.forEach(btn => {
-      const pre = btn.querySelector('pre');
-      // Extract full text and split lines
-      const full = pre.textContent.replace(/\u00A0/g, ''); // normalize NBSP
-      const lines = full.split('\n').map(l => l.replace(/\r/g,''));
-      // trim leading/trailing empty lines
-      while (lines.length && lines[0].trim() === '') lines.shift();
-      while (lines.length && lines[lines.length-1].trim() === '') lines.pop();
-
-      // If fewer than 1 lines, leave as-is
-      if (lines.length < 1) return;
-
-      // We'll treat last non-empty line as "final" to be typed on click.
-      const last = lines.pop();
-
-      // Rebuild displayed pre with everything except last line, and add last-line span
-      pre.innerHTML = '';
-      lines.forEach((ln) => {
-        const node = document.createElement('div');
-        node.textContent = ln;
-        pre.appendChild(node);
-      });
-      // last-line placeholder
-      const lastLine = document.createElement('div');
-      lastLine.className = 'last-line';
-      lastLine.dataset.full = last;
-      lastLine.textContent = ''; // start empty
-      pre.appendChild(lastLine);
-    });
-
-    // --- Physics setup ---
-    const areaRect = () => area.getBoundingClientRect();
-    let items = buttons.map((el, index) => {
-      const rect = el.getBoundingClientRect();
-      return {
+    // Bounce variables
+    let items = buttons.map((el, index) => ({
         el,
-        x: parseFloat(el.style.left) || rect.left || 60 + index*200,
-        y: parseFloat(el.style.top) || rect.top || 60 + index*120,
-        w: rect.width || 360,
-        h: rect.height || 120,
-        vx: (Math.random() * 1.6 + 0.6) * (Math.random() < 0.5 ? -1 : 1),
-        vy: (Math.random() * 1.2 + 0.4) * (Math.random() < 0.5 ? -1 : 1),
-        dragging: false,
-        hovered: false,
+        x: parseFloat(el.style.left) || 100,
+        y: parseFloat(el.style.top) || 100,
+        w: el.offsetWidth,
+        h: el.offsetHeight,
+        vx: (Math.random()*0.2 + 0.05) * (Math.random()<0.5?-1:1),
+        vy: (Math.random()*0.2 + 0.05) * (Math.random()<0.5?-1:1),
         frozen: false
-      };
-    });
-
-    // Place them relative to container if initial absolute positions are stale
-    function placeInitial() {
-      const ar = areaRect();
-      items.forEach((it, i) => {
-        // if position out of bounds, center them
-        if (it.x < ar.left || it.x > ar.right - 80) it.x = ar.left + 60 + (i * 30);
-        if (it.y < ar.top || it.y > ar.bottom - 80) it.y = ar.top + 60 + (i * 30);
-        it.w = it.el.offsetWidth;
-        it.h = it.el.offsetHeight;
-      });
-      // update style
-      items.forEach(it => {
-        it.el.style.left = (it.x - ar.left) + 'px';
-        it.el.style.top = (it.y - ar.top) + 'px';
-      });
-    }
-    // Wait for fonts & layout
-    window.addEventListener('load', () => {
-      placeInitial();
-      // recalc sizes
-      items.forEach(it => {
-        it.w = it.el.offsetWidth;
-        it.h = it.el.offsetHeight;
-      });
-    });
+    }));
 
     // Animation loop
-    let lastTime = performance.now();
-    function step(now) {
-      const dt = Math.min(40, now - lastTime) / 16; // roughly frame normalization
-      lastTime = now;
-      const ar = areaRect();
-      items.forEach((it, idx) => {
-        if (it.dragging || it.frozen) return; // don't move while dragging or frozen during execution
-        // integrate
-        it.x += it.vx * dt * 1.2;
-        it.y += it.vy * dt * 1.2;
-
-        // wall collision (bounce)
-        const leftBound = ar.left + 8;
-        const topBound = ar.top + 8;
-        const rightBound = ar.right - it.w - 8;
-        const bottomBound = ar.bottom - it.h - 8;
-
-        if (it.x < leftBound) { it.x = leftBound; it.vx *= -1; }
-        if (it.x > rightBound) { it.x = rightBound; it.vx *= -1; }
-        if (it.y < topBound) { it.y = topBound; it.vy *= -1; }
-        if (it.y > bottomBound) { it.y = bottomBound; it.vy *= -1; }
-
-        // slight damping to stabilize speed
-        it.vx *= 0.999;
-        it.vy *= 0.999;
-      });
-
-      // inter-item soft collisions (repel slightly)
-      for (let i = 0; i < items.length; i++) {
-        for (let j = i+1; j < items.length; j++) {
-          const a = items[i], b = items[j];
-          const ax = a.x + a.w/2, ay = a.y + a.h/2;
-          const bx = b.x + b.w/2, by = b.y + b.h/2;
-          const dx = bx - ax, dy = by - ay;
-          const dist = Math.sqrt(dx*dx + dy*dy) || 1;
-          const minDist = (a.w + b.w) * 0.28; // comfortable spacing
-          if (dist < minDist) {
-            // push outward
-            const overlap = (minDist - dist) / dist * 0.5;
-            const ox = dx * overlap;
-            const oy = dy * overlap;
-            if (!a.dragging && !a.frozen) { a.x -= ox; a.y -= oy; a.vx -= ox*0.03; a.vy -= oy*0.03; }
-            if (!b.dragging && !b.frozen) { b.x += ox; b.y += oy; b.vx += ox*0.03; b.vy += oy*0.03; }
-          }
-        }
-      }
-
-      // apply to DOM
-      items.forEach(it => {
-        it.el.style.left = (it.x - ar.left) + 'px';
-        it.el.style.top = (it.y - ar.top) + 'px';
-      });
-
-      requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
-
-    // --- Dragging ---
-    let active = null;
-    let offsetX = 0, offsetY = 0;
-    function onDown(e, it) {
-      e.preventDefault();
-      active = it;
-      it.dragging = true;
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      const ar = areaRect();
-      offsetX = clientX - (ar.left + it.x - ar.left);
-      offsetY = clientY - (ar.top + it.y - ar.top);
-      it.el.classList.add('hovered');
-      it.el.style.transition = 'none';
-      // boost z-index
-      it.el.style.zIndex = 99;
-    }
-    function onMove(e) {
-      if (!active) return;
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      const ar = areaRect();
-      active.x = clientX - offsetX - ar.left;
-      active.y = clientY - offsetY - ar.top;
-      active.vx = (Math.random()-0.5) * 2; // small random vel after drag to avoid sticking
-      active.vy = (Math.random()-0.5) * 2;
-      active.el.style.left = (active.x) + 'px';
-      active.el.style.top = (active.y) + 'px';
-    }
-    function onUp() {
-      if (!active) return;
-      active.dragging = false;
-      active.el.classList.remove('hovered');
-      active.el.style.transition = ''; // restore
-      active.el.style.zIndex = '';
-      active = null;
-    }
-
-    // Add event listeners to each element for mousedown/touch
-    items.forEach(it => {
-      const el = it.el;
-      el.addEventListener('mousedown', (e) => onDown(e, it));
-      el.addEventListener('touchstart', (e) => onDown(e, it), {passive:false});
-    });
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('touchmove', onMove, {passive:false});
-    window.addEventListener('mouseup', onUp);
-    window.addEventListener('touchend', onUp);
-
-    // --- Hover push away effect ---
-    items.forEach((a) => {
-      a.el.addEventListener('mouseenter', () => {
-        a.hovered = true;
-        a.el.classList.add('hovered');
-        // apply repulsion to others
-        items.forEach(b => {
-          if (b === a) return;
-          const ax = a.x + a.w/2, ay = a.y + a.h/2;
-          const bx = b.x + b.w/2, by = b.y + b.h/2;
-          const dx = bx - ax, dy = by - ay;
-          const dist = Math.sqrt(dx*dx + dy*dy) || 1;
-          const push = Math.max(20, (200 - dist) * 0.05);
-          b.vx += (dx/dist) * push;
-          b.vy += (dy/dist) * push;
+    function step() {
+        const ar = {left:0, top:0, right:window.innerWidth, bottom:window.innerHeight};
+        items.forEach(it => {
+            if(it.frozen) return;
+            it.x += it.vx;
+            it.y += it.vy;
+            if(it.x < ar.left){it.x=ar.left; it.vx*=-1;}
+            if(it.x > ar.right-it.w){it.x=ar.right-it.w; it.vx*=-1;}
+            if(it.y < ar.top){it.y=ar.top; it.vy*=-1;}
+            if(it.y > ar.bottom-it.h){it.y=ar.bottom-it.h; it.vy*=-1;}
+            it.el.style.left = it.x+'px';
+            it.el.style.top = it.y+'px';
         });
-      });
-      a.el.addEventListener('mouseleave', () => {
-        a.hovered = false;
-        a.el.classList.remove('hovered');
-      });
-    });
+        requestAnimationFrame(step);
+    }
+    step();
 
-    // --- Typing effect (finish last line), sparkle, redirect ---
-    function typeLastLine(el, onComplete) {
-      const last = el.querySelector('.last-line');
-      if (!last) { onComplete(); return; }
-      const full = last.dataset.full || '';
-      // If it's already complete, call complete
-      if (last.textContent.trim() === full.trim()) { onComplete(); return; }
-
-      // animate typing the last line only: append characters
-      let i = 0;
-      const cursor = document.createElement('span');
-      cursor.textContent = '▌';
-      cursor.style.display = 'inline-block';
-      cursor.style.marginLeft = '2px';
-      cursor.style.opacity = '1';
-      cursor.style.animation = 'blink 700ms steps(1,start) infinite';
-      // ensure blink keyframes exist
-      const styleEl = document.createElement('style');
-      styleEl.textContent = '@keyframes blink{50%{opacity:0}}';
-      document.head.appendChild(styleEl);
-      last.appendChild(cursor);
-
-      function step() {
-        if (i <= full.length) {
-          last.textContent = full.slice(0, i);
-          last.appendChild(cursor);
-          i++;
-          setTimeout(step, TYPING_SPEED);
-        } else {
-          // remove cursor
-          cursor.remove();
-          onComplete();
+    // Typing + sparkle + redirect
+    function typeLastLine(el, onComplete){
+        const last = el.querySelector('.last-line');
+        const pre = el.querySelector('pre');
+        if(!last) { onComplete(); return; }
+        // Full text
+        let fullText = pre.textContent.replace(/\u00A0/g,'').trim();
+        pre.textContent = '';
+        last.textContent='';
+        let i=0;
+        function stepChar(){
+            if(i<=fullText.length){
+                pre.textContent = fullText.slice(0,i);
+                i++;
+                setTimeout(stepChar,TYPING_SPEED);
+            } else {
+                onComplete();
+            }
         }
-      }
-      step();
+        stepChar();
     }
 
-    function playSparkles(onDone, hostEl) {
-      // Add sparkle container
-      const container = document.createElement('div');
-      container.className = 'sparkle';
-      hostEl.appendChild(container);
-      const rect = hostEl.getBoundingClientRect();
-      for (let k=0;k<SPARKLE_COUNT;k++) {
-        const dot = document.createElement('div');
-        dot.className = 'dot';
-        // random position across the host
-        const x = Math.random() * rect.width;
-        const y = Math.random() * rect.height;
-        dot.style.left = (x) + 'px';
-        dot.style.top = (y) + 'px';
-        dot.style.animationDelay = (Math.random()*220) + 'ms';
-        // tint to matrix green
-        dot.style.background = '#00ff00';
-        container.appendChild(dot);
-      }
-      // cleanup after longest animation (900ms) + small buffer
-      setTimeout(() => { container.remove(); if (onDone) onDone(); }, 1000);
+    function playSparkles(hostEl, onDone){
+        const container = document.createElement('div');
+        container.className='sparkle';
+        hostEl.appendChild(container);
+        const rect = hostEl.getBoundingClientRect();
+        for(let k=0;k<SPARKLE_COUNT;k++){
+            const dot = document.createElement('div');
+            dot.className='dot';
+            dot.style.left = (Math.random()*rect.width)+'px';
+            dot.style.top = (Math.random()*rect.height)+'px';
+            dot.style.animationDelay=(Math.random()*220)+'ms';
+            container.appendChild(dot);
+        }
+        setTimeout(()=>{container.remove(); if(onDone) onDone();},900);
     }
 
-    // handle click -> freeze -> type -> sparkle -> redirect
-    items.forEach(it => {
-      it.el.addEventListener('click', async (ev) => {
-        // prevent double clicks
-        if (it.frozen) return;
-        it.frozen = true;
-        // stop movement
-        it.vx = 0; it.vy = 0;
-        // Bring to front
-        it.el.style.zIndex = 9999;
-        // run typing only on last line
-        typeLastLine(it.el, () => {
-          // play sparkle
-          playSparkles(() => {
-            // 1 second delay then redirect
-            setTimeout(() => {
-              const dest = it.el.dataset.target;
-              if (dest) window.location.href = dest;
-            }, FINISH_DELAY_AFTER_SPARKLE);
-          }, it.el);
+    buttons.forEach(it=>{
+        it.addEventListener('click',()=>{
+            if(it.dataset.frozen) return;
+            it.dataset.frozen=true;
+            typeLastLine(it, ()=>{
+                playSparkles(it, ()=>{
+                    setTimeout(()=>{window.location.href=it.dataset.target;},FINISH_DELAY_AFTER_SPARKLE);
+                });
+            });
         });
-      });
     });
 
-    // reposition on resize
-    window.addEventListener('resize', () => {
-      // keep them within bounds
-      const ar = areaRect();
-      items.forEach(it => {
-        it.w = it.el.offsetWidth;
-        it.h = it.el.offsetHeight;
-        // clamp
-        if (it.x < ar.left) it.x = ar.left + 8;
-        if (it.y < ar.top) it.y = ar.top + 8;
-        if (it.x > ar.right - it.w) it.x = ar.right - it.w - 8;
-        if (it.y > ar.bottom - it.h) it.y = ar.bottom - it.h - 8;
-      });
-    });
-
-    // small safety: if JS failed to attach types, ensure content visible
-    // (no-op handled by markup)
-  })();
-  </script>
+})();
+</script>
 </body>
 </html>
