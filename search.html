@@ -62,3 +62,11 @@ const btn = document.getElementById('searchBtn');
 async function doSearch() {
   const q = input.value.trim();
   if (!q) return;
+  await showResultsFor(q);
+}
+
+btn.addEventListener('click', doSearch);
+input.addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
+</script>
+</body>
+</html>
