@@ -1,44 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>MyNotes</title>
-<link rel="stylesheet" href="../style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyWeb - Notes</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<canvas id="starfield" data-color="white"></canvas>
 
-<nav>
-  <a href="../index.html">Code Page</a>
-</nav>
+<canvas id="starfield"></canvas>
 
 <main>
-<h1>MyNotes</h1>
-<p>Open separate note windows below:</p>
-<div style="margin-top:1rem;">
-  <button onclick="openNote()">Open New Note</button>
-</div>
-<script>
-function openNote() {
-  const w = window.open("", "", "width=400,height=300");
-  w.document.write(`
-    <html>
-    <head>
-      <title>MyNote</title>
-      <link rel="stylesheet" href="../style.css">
-    </head>
-    <body>
-      <canvas id="starfield" data-color="white"></canvas>
-      <textarea style="width:100%;height:90%;margin-top:10px;font-size:1rem;"></textarea>
-      <script src="../starfield.js"><\/script>
-    </body>
-    </html>
-  `);
-}
-</script>
+    <button class="code-btn" id="newNote" style="left:50px; top:50px;">&lt;script&gt; New Note &lt;/script&gt;<span class="last-line"></span></button>
 </main>
 
-<script src="../starfield.js"></script>
+<script src="starfield.js"></script>
+<script>
+// --- MyNotes Logic ---
+(function(){
+    const TYPING_SPEED = 80;
+    const SPARKLE_COUNT = 14;
+
+    function sparkle(hostEl,onDone){
+        const container=document.createElement('div');
+        container.className='sparkle';
+        hostEl.appendChild(container);
+        const rect=hostEl.getBoundingClientRect();
+        for(let k=0;k<SPARKLE_COUNT;k++){
+            const dot=document.createElement('div');
+            dot.className='dot';
+            dot.style.left=(Math.random()*rect.width)+'px';
+            dot.style.top=(Math.random()*rect.height)+'px';
+            dot.style.animationDelay=(Math.random()*200)+'ms';
+            container.appendChild(dot);
+        }
+        setTimeout(()=>{container.remove(); if(onDone) onDone();},900);
+    }
+
+    function typeAllText(el, fullText, onComplete){
+        el.value='';
+        let i=0;
+        function step(){
+            if(i<=fullText.length){
+                el.value = fullText.slice(0,i);
+                i++;
+                setTimeout(step,TYPING_SPEED);
+            } else { if(onComplete) onComplete(); }
+        }
+        step();
+    }
+
+    function createNote(x=100,y=100){
+        const note = document.createElement('div');
+        note.className='note-window';
+        note.style.left=x+'px';
+        note.style.top=y+'px';
+
+        const header = document.createElement('div');
+        header.className='note-header';
+        header.textContent='MyNote';
+        const closeBtn = document.createElement('span');
+        closeBtn.className='note-close';
+        closeBtn.textContent='✖';
+        header.appendChild(closeBtn);
+        note.appendChild(header);
+
+        const textarea = document.createElement('textarea');
+        textarea.value='// Type your hacker note here...\nfunction hack(){\n    console.log("Hello World");\n}';
+        note.appendChild(textarea);
+
+        closeBtn.onclick = ()=>{ note.remove(); }
+
+        // Click on textarea triggers full retype + sparkle
+        textarea.addEventListener('click', ()=>{
+            typeAllText(textarea, textarea.value, ()=>{
+                sparkle(note,null);
+            });
+        });
+
+        document.body.appendChild(note);
+
+        // Dragging header
+        let offsetX,offsetY,isDown=false;
+        header.addEventListener('mousedown', e=>{
+            isDown=true;
+            offsetX=e.clientX-note.offsetLeft;
+            offsetY=e.clientY-note.offsetTop;
+        });
+        document.addEventListener('mouseup',()=>{isDown=false;});
+        document.addEventListener('mousemove', e=>{
+            if(!isDown) return;
+            note.style.left=(e.clientX-offsetX)+'px';
+            note.style.top=(e.clientY-offsetY)+'px';
+        });
+    }
+
+    document.getElementById('newNote').addEventListener('click',()=>{
+        typeAllText(document.getElementById('newNote').querySelector('span'), 'Creating Note...', ()=>{
+            sparkle(document.getElementById('newNote'), ()=>{ createNote(120,120); });
+        });
+    });
+
+})();
+</script>
 </body>
 </html>
