@@ -3,9 +3,7 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
-html, body {
-  height: 100%;
-}
+html, body { height: 100%; }
 
 body {
   background: #0d0d0d;
@@ -17,7 +15,6 @@ body {
   flex-direction: column;
 }
 
-/* starfield canvas sits behind everything */
 #starfield {
   position: fixed;
   top: 0;
@@ -27,7 +24,6 @@ body {
   z-index: -1;
 }
 
-/* Top navigation */
 nav {
   display: flex;
   justify-content: center;
@@ -48,7 +44,6 @@ nav a {
 }
 nav a:hover { color: #00d4ff; }
 
-/* main content area grows to fill vertical space so footer is pushed down */
 main {
   flex: 1;
   display: flex;
@@ -60,14 +55,12 @@ main {
   width: 100%;
 }
 
-/* page title */
 h1 {
   font-size: 2.5rem;
   margin-bottom: 1.25rem;
   letter-spacing: 0.2px;
 }
 
-/* search bar */
 .search-bar {
   display: flex;
   width: 100%;
@@ -96,7 +89,6 @@ h1 {
 }
 .search-bar button:hover { background: #00aacc; }
 
-/* results */
 #results {
   margin-top: 1.75rem;
   max-width: 880px;
@@ -121,28 +113,6 @@ h1 {
 .result-card a:hover { text-decoration: underline; }
 .result-card p { color: #cfcfcf; font-size: 0.95rem; }
 
-/* sticky footer at bottom */
-footer {
-  margin-top: 1rem;
-  padding: 1rem 1.25rem;
-  background: rgba(20,20,20,0.9);
-  border-top: 1px solid rgba(255,255,255,0.06);
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  z-index: 5;
-  width: 100%;
-}
-
-/* footer links */
-footer a {
-  color: #00d4ff;
-  text-decoration: none;
-  font-weight: 600;
-}
-footer a:hover { color: #00aacc; }
-
-/* smaller screens */
 @media (max-width: 640px) {
   h1 { font-size: 1.8rem; }
   .search-bar input { font-size: 0.95rem; }
