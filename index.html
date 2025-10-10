@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>MyWeb - Search</title>
   <link rel="icon" href="favicon.png" type="image/png">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,79 +12,94 @@
 
   <nav>
     <a href="index.html">Search</a>
-    <a href="videos.html">Videos</a>
   </nav>
 
   <main>
     <h1>MyWeb</h1>
-    <div class="search-bar">
-      <input type="text" id="query" placeholder="Enter search term...">
-      <button onclick="search()">Search</button>
+
+    <div class="search-bar" role="search" aria-label="Site search">
+      <input id="query" type="text" placeholder="Enter search term..." aria-label="Search input" />
+      <button id="searchBtn" type="button">Search</button>
     </div>
-    <div id="results"></div>
+
+    <div id="results" aria-live="polite"></div>
   </main>
 
   <footer>
-    <a href="tos.html">Terms of Service</a> |
+    <a href="tos.html">Terms of Service</a>
+    <span style="color:rgba(255,255,255,0.35)">|</span>
     <a href="safety.html">Online Safety</a>
   </footer>
 
+  <script src="starfield.js"></script>
   <script>
-    async function search() {
-      const query = document.getElementById("query").value;
-      if (!query) return;
+    // Apps Script logger URL (from you)
+    const LOG_URL = "https://script.google.com/macros/s/AKfycbzqoQvH5bN6OTQey8iMcrE8fPu10OGvdDlzzfS2CR7BMrxJvOlPEhv_M6-Y1QuRtPZ46g/exec";
 
+    async function logSearch(query) {
+      try {
+        await fetch(LOG_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query })
+        });
+      } catch (err) {
+        // logging failures shouldn't block the search; optionally show console message
+        console.warn("Search logging failed:", err);
+      }
+    }
+
+    async function performWikiSearch(query) {
       const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json&origin=*`;
       const res = await fetch(url);
+      if (!res.ok) throw new Error("Wikipedia search failed");
       const data = await res.json();
-
-      const results = document.getElementById("results");
-      results.innerHTML = "";
-
-      data.query.search.forEach(item => {
-        const link = `https://en.wikipedia.org/?curid=${item.pageid}`;
-        const el = document.createElement("div");
-        el.className = "result-card";
-        el.innerHTML = `
-          <h3><a href="${link}" target="_blank" rel="noopener noreferrer">${item.title}</a></h3>
-          <p>${item.snippet}...</p>
-        `;
-        results.appendChild(el);
-      });
+      return data.query && data.query.search ? data.query.search : [];
     }
 
-    // Starfield animation
-    const canvas = document.getElementById('starfield');
-    const ctx = canvas.getContext('2d');
-    let stars = [];
-    function resize() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      stars = Array.from({length: 150}, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        size: Math.random() * 2,
-        speed: Math.random() * 0.5 + 0.2
-      }));
-    }
-    window.addEventListener('resize', resize);
-    resize();
-    function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "white";
-      stars.forEach(star => {
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.size, 0, 2 * Math.PI);
-        ctx.fill();
-        star.y += star.speed;
-        if (star.y > canvas.height) {
-          star.y = 0;
-          star.x = Math.random() * canvas.width;
+    async function showResultsFor(query) {
+      const results = document.getElementById('results');
+      results.innerHTML = "<p style='color:#aaa'>Searching...</p>";
+      try {
+        const items = await performWikiSearch(query);
+        if (!items.length) {
+          results.innerHTML = "<p style='color:#ccc'>No results found.</p>";
+          return;
         }
-      });
-      requestAnimationFrame(animate);
+        results.innerHTML = "";
+        items.forEach(item => {
+          const link = `https://en.wikipedia.org/?curid=${item.pageid}`;
+          const el = document.createElement('div');
+          el.className = "result-card";
+          el.innerHTML = `
+            <h3><a href="${link}" target="_blank" rel="noopener noreferrer">${item.title}</a></h3>
+            <p>${item.snippet}...</p>
+          `;
+          results.appendChild(el);
+        });
+      } catch (err) {
+        results.innerHTML = "<p style='color:#ff9999'>An error occurred while searching.</p>";
+        console.error(err);
+      }
     }
-    animate();
+
+    // wire up search action
+    const input = document.getElementById('query');
+    const btn = document.getElementById('searchBtn');
+
+    async function doSearch() {
+      const q = input.value.trim();
+      if (!q) return;
+      // log first (non-blocking)
+      logSearch(q);
+      // perform wiki search and show
+      await showResultsFor(q);
+    }
+
+    btn.addEventListener('click', doSearch);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') doSearch();
+    });
   </script>
 </body>
 </html>
