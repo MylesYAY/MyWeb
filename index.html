@@ -1,129 +1,220 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MyWeb</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MyWeb — Wikipedia Summary Search</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --baby-blue:#A8D8FF; /* soft baby blue */
+      --off-white:#FAF9F6; /* warm off white */
+      --muted:#6b7280;
+      --radius:14px;
+      --glass: rgba(255,255,255,0.6);
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background: linear-gradient(180deg, var(--off-white) 0%, #F6FBFF 100%);
+      color:#0f172a;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:32px;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    .container{
+      width:100%;
+      max-width:880px;
+      background:var(--off-white);
+      border-radius:20px;
+      padding:28px;
+      box-shadow: 0 10px 30px rgba(13, 38, 78, 0.08);
+      border: 1px solid rgba(10,20,40,0.04);
+    }
+
+    header{
+      display:flex;
+      gap:16px;
+      align-items:center;
+      margin-bottom:20px;
+    }
+    .logo{
+      width:64px;height:64px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--baby-blue),#D7EEFF);
+      box-shadow: 0 6px 18px rgba(101,138,189,0.12);
+      font-weight:700;color:#05264a;font-size:20px;
+    }
+    h1{margin:0;font-size:20px}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+
+    .search-row{display:flex;gap:12px;align-items:center;margin-top:18px}
+    .search-input{flex:1;display:flex;align-items:center;background:white;border-radius:12px;padding:10px 12px;border:1px solid rgba(10,20,40,0.06)}
+    .search-input input{border:0;outline:none;font-size:16px;padding:8px;background:transparent;width:100%;font-family:inherit;color:#ffffff;}
+    .btn{background:var(--baby-blue);border:0;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer;color:#04203b}
+    .btn:active{transform:translateY(1px)}
+
+    .result{
+      margin-top:22px;background:linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.95));
+      border-radius:12px;padding:18px;border:1px solid rgba(10,20,40,0.04);
+    }
+    .meta{display:flex;gap:14px;align-items:flex-start}
+    .thumb{width:96px;height:96px;border-radius:8px;flex:0 0 96px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .thumb img{width:100%;height:100%;object-fit:cover}
+    .text{flex:1}
+    .title{font-weight:700;margin:0 0 6px 0}
+    .desc{margin:0;color:var(--muted);font-size:14px}
+    .extract{margin-top:12px;line-height:1.5;color:#0b2540;}
+
+    .note{margin-top:12px;font-size:13px;color:var(--muted)}
+
+    .center{display:flex;justify-content:center}
+
+    @media (max-width:640px){
+      .meta{flex-direction:column}
+      .thumb{width:100%;height:180px}
+    }
+    @media (prefers-color-scheme: dark) {
+    .thumb {  }
+    .extract { color: #e5e7eb; }
+    body {
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    .container {
+      background: #1e293b;
+      border-color: rgba(255,255,255,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .logo {
+      background: linear-gradient(135deg, #4ea8ff, #9bd0ff);
+      color: #0f172a;
+    }
+    .search-input {
+      background: #0f172a;
+      border-color: rgba(255,255,255,0.1);
+    }
+    .btn {
+      background: #4ea8ff;
+      color: #0f172a;
+    }
+    .result {
+      background: #1e293b;
+      border-color: rgba(255,255,255,0.1);
+    }
+    .thumb {
+      
+    }
+    .desc, .note {
+      color: #94a3b8;
+    }
+    a { color: #93caff; }
+  }
+</style>
 </head>
 <body>
+  <div class="container" role="main">
+    <header>
+      <div class="logo" aria-hidden>M</div>
+      <div>
+        <h1>MyWeb</h1>
+        <p class="lead">Search a topic and get the Wikipedia summary instantly.</p>
+      </div>
+    </header>
 
-<canvas id="starfield"></canvas>
+    <form id="searchForm" autocomplete="off" aria-label="Wikipedia search form">
+      <div class="search-row">
+        <div class="search-input" role="search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="margin-right:8px" aria-hidden>
+            <path d="M21 21l-4.35-4.35" stroke="#6b7280" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="11" cy="11" r="6" stroke="#6b7280" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <input id="query" type="search" placeholder="Search Wikipedia (e.g. "Swan" or "JavaScript")" aria-label="Search Wikipedia"/>
+        </div>
+        <button class="btn" id="searchBtn" type="submit">Search</button>
+      </div>
+    </form>
 
-<main class="code-area" id="codeArea">
-    <!-- Search Button -->
-    <div class="code-btn" data-target="search.html" style="left:80px; top:120px;">
-<pre>
-&lt;script&gt;
-    if(search) searchDo();
-&lt;/script&gt;
-<span class="last-line"></span>
-</pre>
-    </div>
+    <div id="output" aria-live="polite"></div>
 
-    <!-- Notes Button -->
-    <div class="code-btn" data-target="sm1le.html" style="left:460px; top:260px;">
-<pre>
-&lt;script&gt;
-    while(notes) open('MyNotes');
-&lt;/script&gt;
-<span class="last-line"></span>
-</pre>
-    </div>
-</main>
+  </div>
 
-<script src="starfield.js"></script>
-<script>
-// --- Code Page Logic ---
-(function() {
-    const TYPING_SPEED = 80;
-    const FINISH_DELAY_AFTER_SPARKLE = 1000;
-    const SPARKLE_COUNT = 14;
+  <script>
+    const form = document.getElementById('searchForm');
+    const queryInput = document.getElementById('query');
+    const output = document.getElementById('output');
 
-    const buttons = Array.from(document.querySelectorAll('.code-btn'));
-
-    // Bounce variables
-    let items = buttons.map((el, index) => ({
-        el,
-        x: parseFloat(el.style.left) || 100,
-        y: parseFloat(el.style.top) || 100,
-        w: el.offsetWidth,
-        h: el.offsetHeight,
-        vx: (Math.random()*0.2 + 0.05) * (Math.random()<0.5?-1:1),
-        vy: (Math.random()*0.2 + 0.05) * (Math.random()<0.5?-1:1),
-        frozen: false
-    }));
-
-    // Animation loop
-    function step() {
-        const ar = {left:0, top:0, right:window.innerWidth, bottom:window.innerHeight};
-        items.forEach(it => {
-            if(it.frozen) return;
-            it.x += it.vx;
-            it.y += it.vy;
-            if(it.x < ar.left){it.x=ar.left; it.vx*=-1;}
-            if(it.x > ar.right-it.w){it.x=ar.right-it.w; it.vx*=-1;}
-            if(it.y < ar.top){it.y=ar.top; it.vy*=-1;}
-            if(it.y > ar.bottom-it.h){it.y=ar.bottom-it.h; it.vy*=-1;}
-            it.el.style.left = it.x+'px';
-            it.el.style.top = it.y+'px';
-        });
-        requestAnimationFrame(step);
-    }
-    step();
-
-    // Typing + sparkle + redirect
-    function typeLastLine(el, onComplete){
-        const last = el.querySelector('.last-line');
-        const pre = el.querySelector('pre');
-        if(!last) { onComplete(); return; }
-        // Full text
-        let fullText = pre.textContent.replace(/\u00A0/g,'').trim();
-        pre.textContent = '';
-        last.textContent='';
-        let i=0;
-        function stepChar(){
-            if(i<=fullText.length){
-                pre.textContent = fullText.slice(0,i);
-                i++;
-                setTimeout(stepChar,TYPING_SPEED);
-            } else {
-                onComplete();
-            }
-        }
-        stepChar();
-    }
-
-    function playSparkles(hostEl, onDone){
-        const container = document.createElement('div');
-        container.className='sparkle';
-        hostEl.appendChild(container);
-        const rect = hostEl.getBoundingClientRect();
-        for(let k=0;k<SPARKLE_COUNT;k++){
-            const dot = document.createElement('div');
-            dot.className='dot';
-            dot.style.left = (Math.random()*rect.width)+'px';
-            dot.style.top = (Math.random()*rect.height)+'px';
-            dot.style.animationDelay=(Math.random()*220)+'ms';
-            container.appendChild(dot);
-        }
-        setTimeout(()=>{container.remove(); if(onDone) onDone();},900);
-    }
-
-    buttons.forEach(it=>{
-        it.addEventListener('click',()=>{
-            if(it.dataset.frozen) return;
-            it.dataset.frozen=true;
-            typeLastLine(it, ()=>{
-                playSparkles(it, ()=>{
-                    setTimeout(()=>{window.location.href=it.dataset.target;},FINISH_DELAY_AFTER_SPARKLE);
-                });
-            });
-        });
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const q = queryInput.value.trim();
+      if(!q){
+        showNote('Please enter a search term.');
+        return;
+      }
+      await fetchSummary(q);
     });
 
-})();
-</script>
+    function showNote(msg){
+      output.innerHTML = `<div class="note">${escapeHtml(msg)}</div>`;
+    }
+
+    function escapeHtml(str){
+      return str.replace(/[&<>"']/g, function(m){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];});
+    }
+
+    async function fetchSummary(q){
+      output.innerHTML = `<div class="center"><div class="note">Loading summary for "${escapeHtml(q)}"...</div></div>`;
+      const title = encodeURIComponent(q.replace(/\s+/g,'_'));
+      const endpoint = `https://en.wikipedia.org/api/rest_v1/page/summary/${title}`;
+      try{
+        const res = await fetch(endpoint, {headers: { 'Accept': 'application/json' }});
+        if(!res.ok){
+          if(res.status === 404){
+            showNote(`No Wikipedia page found for "${escapeHtml(q)}".`);
+            return;
+          }
+          throw new Error('Network response was not ok');
+        }
+        const data = await res.json();
+        renderResult(data);
+      }catch(err){
+        console.error(err);
+        showNote('Sorry — something went wrong. Check your connection and try again.');
+      }
+    }
+
+    function renderResult(data){
+      // data has keys: title, extract, description, thumbnail, content_urls
+      const imgSrc = data.thumbnail ? data.thumbnail.source : (data.originalimage ? data.originalimage.source : null);
+      const thumbHtml = imgSrc ? `<div class=\"thumb\"><img src=\"${escapeHtml(imgSrc)}\" alt=\"${escapeHtml(data.title)} image\"/></div>` : `<div class=\"thumb\" aria-hidden><svg width=\"48\" height=\"48\" viewBox=\"0 0 24 24\" fill=\"none\"><path d=\"M3 3h18v18H3z\" stroke=\"#cfeeff\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/></svg></div>`;
+      const sourceLink = data.content_urls && data.content_urls.desktop && data.content_urls.desktop.page ? data.content_urls.desktop.page : `https://en.wikipedia.org/wiki/${encodeURIComponent(data.title.replace(/\s+/g,'_'))}`;
+
+      output.innerHTML = `
+        <article class="result">
+          <div class="meta">
+            ${thumbHtml}
+            <div class="text">
+              <h2 class="title">${escapeHtml(data.title)}</h2>
+              <p class="desc">${escapeHtml(data.description || data.type || '')}</p>
+            </div>
+          </div>
+          <div class="extract">${escapeHtml(data.extract || 'No summary available.')}</div>
+          <div class="note">Source: <a href="${escapeHtml(sourceLink)}" target="_blank" rel="noopener">Wikipedia — ${escapeHtml(data.title)}</a></div>
+        </article>
+      `;
+    }
+
+    // small nicety: press Escape to clear
+    queryInput.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape'){
+        queryInput.value=''; output.innerHTML='';
+      }
+    });
+  </script>
 </body>
 </html>
-
